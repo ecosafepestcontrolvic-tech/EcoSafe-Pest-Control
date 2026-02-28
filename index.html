@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="EcoSafe">
+<title>EcoSafe Pest Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:#0C0F0C;--bg2:#111411;--bg3:#161A16;--bg4:#1B201B;--bg5:#212821;
+  --br:#252D25;--br2:#2E382E;--br3:#384838;
+  --lime:#8FD14F;--lime2:#5A9830;--lime3:#213A10;--limeglow:rgba(143,209,79,.14);
+  --amb:#F0A030;--amb2:#6A4010;--ambglow:rgba(240,160,48,.12);
+  --red:#E04848;--red2:#401818;
+  --blue:#5AB0E8;--blue2:#103050;
+  --t1:#E0EAE0;--t2:#8AA88A;--t3:#4E604E;--t4:#2A362A;
+  --mono:'DM Mono',monospace;--disp:'Syne',sans-serif;--body:'DM Sans',sans-serif;
+  --r:12px;--rs:7px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:var(--body);overflow:hidden;}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;}
+
+/* TOPBAR */
+#topbar{background:var(--bg2);border-bottom:1px solid var(--br);padding:0 16px;padding-top:max(12px,var(--st));padding-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand-mark{width:36px;height:36px;border-radius:9px;background:var(--lime3);border:1px solid var(--lime2);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 14px var(--limeglow);}
+.brand-name{font-family:var(--disp);font-size:15px;font-weight:800;letter-spacing:.5px;}
+.brand-sub{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:1px;letter-spacing:.8px;}
+.topbar-r{display:flex;gap:7px;align-items:center;}
+.pill{font-family:var(--mono);font-size:8px;font-weight:500;padding:3px 9px;border-radius:20px;letter-spacing:.8px;cursor:pointer;border:1px solid transparent;}
+.pill-tech{background:var(--lime3);color:var(--lime);border-color:var(--lime2);}
+.pill-admin{background:var(--amb2);color:var(--amb);border-color:rgba(240,160,48,.4);}
+.ic{width:36px;height:36px;border-radius:var(--rs);background:var(--bg4);border:1px solid var(--br);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.ic:active{background:var(--bg5);}
+
+/* SBAR */
+#sbar{background:var(--bg2);border-bottom:1px solid var(--br);padding:4px 16px;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--t3);flex-shrink:0;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--t3);flex-shrink:0;}
+.dot.ok{background:var(--lime);box-shadow:0 0 5px var(--lime);}
+.dot.go{background:var(--amb);animation:blink .8s ease-in-out infinite;}
+.dot.err{background:var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* SCREENS */
+.scr{flex:1;overflow:hidden;display:none;flex-direction:column;}
+.scr.on{display:flex;}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:11px;}
+
+/* NAV */
+nav{background:var(--bg2);border-top:1px solid var(--br);display:flex;flex-shrink:0;padding-bottom:max(6px,var(--sb));}
+.nb{flex:1;padding:9px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;color:var(--t3);font-family:var(--body);font-size:9px;font-weight:500;position:relative;}
+.nb .ni{font-size:19px;line-height:1;}
+.nb.on{color:var(--lime);}
+.nb.on::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--lime);border-radius:0 0 2px 2px;}
+.nbadge{position:absolute;top:4px;right:calc(50% - 18px);background:var(--amb);color:#000;font-size:8px;font-weight:700;min-width:14px;height:14px;border-radius:7px;display:none;align-items:center;justify-content:center;font-family:var(--mono);}
+
+/* SCAN TABS */
+.stabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--br);flex-shrink:0;}
+.stab{flex:1;padding:10px 4px;border:none;background:none;color:var(--t3);font-family:var(--mono);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.5px;position:relative;}
+.stab.on{color:var(--lime);}
+.stab.on::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;background:var(--lime);border-radius:2px 2px 0 0;}
+
+/* CAMERA */
+#cam-wrap{position:relative;background:#000;flex-shrink:0;display:none;}
+#cam-video{width:100%;display:block;max-height:46vw;object-fit:cover;}
+#cam-canvas{display:none;}
+.vf{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.vfb{width:min(42vw,170px);height:min(42vw,170px);position:relative;}
+.vfb::before,.vfb::after,.vfb span::before,.vfb span::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--lime);border-style:solid;}
+.vfb::before{top:0;left:0;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
+.vfb::after{top:0;right:0;border-width:2px 2px 0 0;border-radius:0 3px 0 0;}
+.vfb span::before{bottom:0;left:0;border-width:0 0 2px 2px;border-radius:0 0 0 3px;}
+.vfb span::after{bottom:0;right:0;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
+.sline{position:absolute;left:3px;right:3px;height:1px;background:linear-gradient(90deg,transparent,var(--lime),transparent);top:3px;animation:sl 1.7s linear infinite;box-shadow:0 0 5px var(--lime);}
+@keyframes sl{0%{top:3px;opacity:1}100%{top:calc(100% - 3px);opacity:0}}
+.cam-lbl{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:var(--t2);font-size:10px;font-family:var(--mono);padding:4px 12px;border-radius:20px;white-space:nowrap;}
+#cam-idle{padding:14px;flex-shrink:0;}
+.scan-start{width:100%;padding:17px;border-radius:var(--r);background:var(--lime3);border:1px solid var(--lime2);color:var(--lime);font-family:var(--disp);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 0 18px var(--limeglow);}
+.scan-start:active{background:rgba(143,209,79,.2);}
+#cam-err{display:none;margin-top:10px;font-size:11px;color:var(--red);background:var(--red2);border:1px solid rgba(224,72,72,.3);border-radius:var(--r);padding:12px;font-family:var(--mono);line-height:1.6;}
+
+/* CARDS */
+.card{background:var(--bg3);border:1px solid var(--br);border-radius:var(--r);padding:15px;}
+.card-hd{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;}
+.card-hd.lime{color:var(--lime);}
+.card-hd.amb{color:var(--amb);}
+
+/* FORM */
+.frow{display:flex;flex-direction:column;gap:4px;}
+.flbl{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;}
+.finp{background:var(--bg4);border:1px solid var(--br);border-radius:var(--rs);padding:10px 12px;color:var(--t1);font-family:var(--mono);font-size:12px;outline:none;width:100%;-webkit-appearance:none;}
+.finp:focus{border-color:var(--lime2);}
+.finp::placeholder{color:var(--t3);}
+.finp-body{font-family:var(--body);font-size:13px;line-height:1.5;resize:none;}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fhelp{font-size:10px;color:var(--t3);line-height:1.5;margin-top:3px;}
+
+/* LEVEL PICKER */
+.lvls{display:flex;gap:5px;}
+.lvl{flex:1;padding:9px 3px;border-radius:var(--rs);border:1px solid var(--br);background:var(--bg4);color:var(--t3);font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;}
+.lvl.s-none{border-color:var(--blue);background:var(--blue2);color:var(--blue);}
+.lvl.s-low{border-color:var(--lime2);background:var(--lime3);color:var(--lime);}
+.lvl.s-med{border-color:var(--amb);background:var(--amb2);color:var(--amb);}
+.lvl.s-high{border-color:var(--red);background:var(--red2);color:var(--red);}
+
+/* VOICE */
+#transcript{background:var(--bg4);border:1px solid var(--br);border-radius:var(--rs);padding:12px;min-height:68px;font-size:13px;line-height:1.6;color:var(--t2);}
+#transcript.emp{color:var(--t3);font-style:italic;font-size:12px;}
+#transcript.rec{border-color:var(--red);box-shadow:0 0 0 2px rgba(224,72,72,.1);}
+.recbtn{width:100%;height:54px;border-radius:var(--r);border:1px solid var(--br);background:var(--bg4);color:var(--t1);font-family:var(--mono);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.4px;}
+.recbtn.on{background:var(--red2);border-color:var(--red);color:var(--red);}
+
+/* PHOTOS */
+.photo-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.photo-wrap{position:relative;flex-shrink:0;}
+.photo-thumb{width:72px;height:72px;border-radius:var(--rs);object-fit:cover;border:1px solid var(--br);cursor:pointer;display:block;}
+.photo-del{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;}
+.photo-add{width:72px;height:72px;border-radius:var(--rs);border:1px dashed var(--br2);background:var(--bg4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--t3);font-size:10px;font-family:var(--mono);flex-shrink:0;}
+.photo-add:active{background:var(--bg5);}
+.ai-cap{font-size:11px;color:var(--t2);background:var(--bg4);border-left:2px solid var(--lime2);padding:7px 10px;margin-top:4px;line-height:1.5;font-style:italic;border-radius:0 var(--rs) var(--rs) 0;}
+.ai-cap.analysing{border-left-color:var(--amb);color:var(--amb);}
+
+/* PRODUCTS */
+.prod-item{background:var(--bg4);border:1px solid var(--br);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:flex-start;gap:10px;}
+.prod-info{flex:1;min-width:0;}
+.prod-name{font-size:13px;font-weight:600;}
+.prod-detail{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;line-height:1.5;}
+.prod-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:2px 6px;flex-shrink:0;}
+
+/* PROOF */
+.proof{background:var(--lime3);border:1px solid var(--lime2);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:11px;}
+.proof-lbl{font-family:var(--mono);font-size:10px;color:var(--lime);font-weight:500;letter-spacing:.5px;}
+.proof-val{font-size:11px;color:var(--t2);margin-top:2px;}
+
+/* ASSET ROW */
+.asset-row{background:var(--bg3);border:1px solid var(--br);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;}
+.asset-row:active{background:var(--bg4);}
+.arow-icon{font-size:24px;flex-shrink:0;}
+.arow-info{flex:1;min-width:0;}
+.arow-name{font-size:13px;font-weight:600;}
+.arow-sub{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.abadge{font-family:var(--mono);font-size:8px;padding:3px 7px;border-radius:4px;flex-shrink:0;letter-spacing:.5px;}
+.ab-ok{background:rgba(143,209,79,.1);color:var(--lime);border:1px solid var(--lime3);}
+.ab-due{background:var(--amb2);color:var(--amb);border:1px solid rgba(240,160,48,.3);}
+.ab-new{background:var(--bg5);color:var(--t3);border:1px solid var(--br);}
+
+/* CUSTOMER ROW */
+.cust-row{background:var(--bg3);border:1px solid var(--br);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;}
+.cust-row:active{background:var(--bg4);}
+.cust-av{width:36px;height:36px;border-radius:50%;background:var(--lime3);border:1px solid var(--lime2);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:13px;font-weight:800;color:var(--lime);flex-shrink:0;}
+.cust-info{flex:1;min-width:0;}
+.cust-name{font-size:13px;font-weight:600;}
+.cust-sub{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;}
+
+/* HISTORY ITEM */
+.hist-item{background:var(--bg3);border:1px solid var(--br);border-radius:var(--r);padding:13px;display:flex;flex-direction:column;gap:8px;}
+.hist-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.hist-name{font-size:13px;font-weight:600;}
+.hist-ts{font-family:var(--mono);font-size:9px;color:var(--t3);text-align:right;flex-shrink:0;}
+.hist-meta{font-family:var(--mono);font-size:10px;color:var(--t3);}
+.chips{display:flex;flex-wrap:wrap;gap:5px;}
+.chip{background:var(--bg4);border:1px solid var(--br);border-radius:4px;padding:3px 8px;font-family:var(--mono);font-size:10px;}
+.chip .ck{color:var(--t3);}
+.chip .cv{color:var(--t1);}
+.hist-note{font-size:12px;color:var(--t2);line-height:1.5;border-left:2px solid var(--br2);padding-left:9px;}
+.hist-proof{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--lime);}
+.hist-thumbs{display:flex;gap:5px;flex-wrap:wrap;}
+.hist-thumb{width:52px;height:52px;border-radius:var(--rs);object-fit:cover;border:1px solid var(--br);cursor:pointer;}
+
+/* BUTTONS */
+.btn{width:100%;height:50px;border-radius:var(--r);border:none;font-family:var(--disp);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none;letter-spacing:.3px;}
+.btn-p{background:var(--lime3);color:var(--lime);border:1px solid var(--lime2);box-shadow:0 0 16px var(--limeglow);}
+.btn-p:active{background:rgba(143,209,79,.2);}
+.btn-p:disabled{background:var(--bg4);color:var(--t3);border-color:var(--br);box-shadow:none;}
+.btn-s{background:var(--bg4);color:var(--t2);border:1px solid var(--br);}
+.btn-s:active{background:var(--bg5);}
+.btn-amb{background:var(--amb2);color:var(--amb);border:1px solid rgba(240,160,48,.4);}
+.btn-red{background:var(--red2);color:var(--red);border:1px solid rgba(224,72,72,.3);}
+.btn-sm{height:40px;font-size:11px;}
+.btn-row{display:grid;grid-template-columns:1fr 2fr;gap:8px;}
+.btn-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+
+/* SPINNER */
+.proc{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px;text-align:center;}
+.spin{width:34px;height:34px;border:2px solid var(--br);border-top-color:var(--lime);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.proc-lbl{font-family:var(--mono);font-size:11px;color:var(--t2);}
+
+/* SUCCESS */
+.suc{background:var(--lime3);border:1px solid var(--lime2);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:13px;}
+.suc-ttl{font-family:var(--disp);font-size:14px;font-weight:700;color:var(--lime);}
+.suc-sub{font-size:11px;color:var(--t2);margin-top:3px;}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;display:none;align-items:flex-end;}
+.mbg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--br);border-radius:16px 16px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px;padding-bottom:max(20px,var(--sb));display:flex;flex-direction:column;gap:11px;position:relative;}
+.modal-hd{font-family:var(--disp);font-size:16px;font-weight:700;margin-bottom:2px;padding-right:36px;}
+.modal-x{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:var(--bg4);border:1px solid var(--br);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+
+/* PHOTO badge (glasses scan) */
+#ppw{display:none;border-radius:var(--rs);overflow:hidden;border:1px solid var(--br);position:relative;flex-shrink:0;}
+#ppi{width:100%;display:block;max-height:190px;object-fit:contain;background:#000;}
+.pbadge{position:absolute;top:8px;right:8px;padding:3px 9px;border-radius:14px;font-family:var(--mono);font-size:10px;font-weight:500;backdrop-filter:blur(6px);background:rgba(0,0,0,.8);}
+.pbadge.sc{color:var(--amb);}
+.pbadge.ok{color:var(--lime);}
+.pbadge.fl{color:var(--red);}
+#qr-debug{display:none;background:var(--bg3);border:1px solid var(--amb);border-radius:var(--r);padding:12px;}
+#qr-debug-txt{font-family:var(--mono);font-size:10px;color:var(--t2);word-break:break-all;background:var(--bg4);padding:9px;border-radius:var(--rs);margin:7px 0;}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:36px 20px;text-align:center;}
+.empty-ico{font-size:36px;opacity:.2;}
+.empty-txt{font-size:11px;color:var(--t3);line-height:1.6;font-family:var(--mono);}
+
+/* TOAST */
+.toast{position:fixed;bottom:max(82px,calc(var(--sb)+76px));left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg5);border:1px solid var(--br2);color:var(--t1);font-size:11px;font-family:var(--mono);padding:8px 16px;border-radius:22px;opacity:0;transition:.2s;pointer-events:none;z-index:400;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 24px rgba(0,0,0,.8);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* REPORT OVERLAY */
+#rpt-view{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;overflow-y:auto;}
+#rpt-view.open{display:flex;}
+.rpt-hdr{background:var(--bg2);border-bottom:1px solid var(--br);padding:16px;padding-top:max(16px,var(--st));}
+.rpt-title{font-family:var(--disp);font-size:22px;font-weight:800;line-height:1.2;}
+.rpt-sub-txt{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px;letter-spacing:.5px;}
+.rpt-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.rpt-body{padding:16px;display:flex;flex-direction:column;gap:14px;max-width:640px;margin:0 auto;width:100%;padding-bottom:40px;}
+.rpt-sec{border:1px solid var(--br);border-radius:var(--r);overflow:hidden;}
+.rpt-sec-hd{background:var(--bg3);border-bottom:1px solid var(--br);padding:9px 14px;font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;}
+.rpt-sec-hd.lime{color:var(--lime);}
+.rpt-sec-hd.amb{color:var(--amb);}
+.rpt-sec-body{padding:14px;background:var(--bg2);}
+.rpt-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--br);gap:12px;}
+.rpt-row:last-child{border-bottom:none;}
+.rpt-k{font-family:var(--mono);font-size:10px;color:var(--t3);}
+.rpt-v{font-size:12px;font-weight:500;text-align:right;max-width:60%;}
+.rpt-proof{background:var(--lime3);border:1px solid var(--lime2);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:11px;}
+.rpt-photo{width:100%;max-height:240px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--br);display:block;margin-bottom:4px;}
+.rpt-cap{font-size:11px;color:var(--t2);font-style:italic;line-height:1.5;padding:2px 0 10px;}
+
+/* PRINT */
+#print-sheet{display:none;}
+@media print{
+  body *{display:none!important;}
+  #rpt-view{display:block!important;position:static!important;background:#fff!important;color:#111!important;}
+  #rpt-view .rpt-actions{display:none!important;}
+  #rpt-view *{color:inherit!important;border-color:#ccc!important;background:#fff!important;}
+  #rpt-view .rpt-proof{background:#e8f5e0!important;border-color:#6A9830!important;}
+  #print-sheet{display:grid!important;grid-template-columns:repeat(3,1fr);gap:4mm;padding:8mm;background:#fff;}
+  .pcell{border:1px solid #ccc;border-radius:2mm;padding:4mm;display:flex;flex-direction:column;align-items:center;gap:2mm;page-break-inside:avoid;}
+  .pn{font-family:monospace;font-size:7pt;font-weight:700;text-align:center;color:#111;}
+  .ps{font-family:monospace;font-size:6pt;color:#555;text-align:center;}
+  .pt{font-family:monospace;font-size:5pt;color:#999;text-align:center;}
+}
+
+/* OR divider */
+.or{display:flex;align-items:center;gap:9px;margin:4px 0;}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--br);}
+.or span{font-family:var(--mono);font-size:9px;color:var(--t3);}
+
+/* Filter */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;}
+.fbtn{padding:6px 12px;border-radius:20px;border:1px solid var(--br);background:var(--bg4);color:var(--t3);font-family:var(--mono);font-size:10px;cursor:pointer;}
+.fbtn.on{border-color:var(--lime2);color:var(--lime);background:var(--lime3);}
+
+/* Lightbox */
+#lb-bg{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;}
+#lb-bg.open{display:flex;}
+#lb-img{max-width:100%;max-height:70vh;object-fit:contain;border-radius:var(--r);}
+#lb-cap{font-size:12px;color:var(--t2);text-align:center;margin-top:12px;line-height:1.6;max-width:500px;}
+#lb-x{position:absolute;top:max(16px,var(--st));right:16px;width:36px;height:36px;border-radius:50%;background:var(--bg4);border:1px solid var(--br);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <div class="brand">
+      <div class="brand-mark">🛡️</div>
+      <div>
+        <div class="brand-name">ECOSAFE</div>
+        <div class="brand-sub" id="topbar-sub">PEST CONTROL · FIELD SYSTEM</div>
+      </div>
+    </div>
+    <div class="topbar-r">
+      <div class="pill pill-tech" id="mode-pill" onclick="toggleMode()">TECH</div>
+      <div class="ic" onclick="showScr('settings')">⚙</div>
+    </div>
+  </div>
+  <div id="sbar"><div class="dot ok" id="sdot"></div><span id="smsg">Ready</span></div>
+
+  <!-- ═══════════ SCAN SCREEN ═══════════ -->
+  <div id="scr-scan" class="scr on">
+    <div class="stabs" id="stabs">
+      <button class="stab on" id="stab-live"   onclick="setTab('live')">  📷 LIVE</button>
+      <button class="stab"    id="stab-photo"  onclick="setTab('photo')"> 👓 GLASSES</button>
+      <button class="stab"    id="stab-manual" onclick="setTab('manual')">✏️ MANUAL</button>
+    </div>
+
+    <!-- Live tab -->
+    <div id="tab-live" style="flex-shrink:0;">
+      <div id="cam-wrap">
+        <video id="cam-video" autoplay playsinline muted></video>
+        <canvas id="cam-canvas"></canvas>
+        <div class="vf"><div class="vfb"><span></span><div class="sline"></div></div></div>
+        <div class="cam-lbl" id="cam-lbl">Point at QR label</div>
+      </div>
+      <div id="cam-idle">
+        <button class="scan-start" onclick="startCamera()"><span style="font-size:19px;">📷</span> START LIVE SCANNER</button>
+        <div id="cam-err"></div>
+      </div>
+    </div>
+
+    <!-- Glasses tab -->
+    <div id="tab-photo" style="display:none;flex-shrink:0;padding:14px;flex-direction:column;gap:10px;">
+      <div class="card">
+        <div class="card-hd">Ray-Ban Meta Glasses</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;gap:9px;background:var(--bg4);border:1px solid var(--br);border-radius:var(--rs);padding:10px 12px;">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--lime);flex-shrink:0;font-weight:500;">01</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.5;"><strong style="color:var(--t1);">Get 20–30cm from the label.</strong> Small QRs need to fill the frame.</div>
+          </div>
+          <div style="display:flex;gap:9px;background:var(--bg4);border:1px solid var(--br);border-radius:var(--rs);padding:10px 12px;">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--lime);flex-shrink:0;font-weight:500;">02</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.5;"><strong style="color:var(--t1);">Look at QR, press glasses button.</strong> Hold still before pressing.</div>
+          </div>
+          <div style="display:flex;gap:9px;background:var(--bg4);border:1px solid var(--br);border-radius:var(--rs);padding:10px 12px;">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--lime);flex-shrink:0;font-weight:500;">03</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.5;"><strong style="color:var(--t1);">Tap below, select the photo.</strong> App tries 9 crop levels to find QR.</div>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handleGlassesPhoto(event)">
+      <button class="btn btn-p" onclick="document.getElementById('photo-input').click()"><span style="font-size:17px;">🖼️</span> SELECT GLASSES PHOTO</button>
+      <div id="ppw"><img id="ppi" src="" alt=""><div class="pbadge sc" id="photo-badge">SCANNING…</div></div>
+      <div id="qr-debug">
+        <div class="card-hd amb">QR DECODED — RAW CONTENT</div>
+        <div id="qr-debug-txt"></div>
+        <div style="font-size:10px;color:var(--t3);line-height:1.5;">QR read but UUID not matched. Copied to Manual tab.</div>
+      </div>
+    </div>
+
+    <!-- Manual tab -->
+    <div id="tab-manual" style="display:none;flex-shrink:0;padding:14px;flex-direction:column;gap:10px;">
+      <div class="card">
+        <div class="card-hd">Manual Asset Entry</div>
+        <div class="frow">
+          <div class="flbl">Asset UUID or QR URL</div>
+          <textarea id="manual-uuid" class="finp finp-body" rows="3" placeholder="Paste UUID or full QR URL…" autocorrect="off" autocapitalize="none" spellcheck="false"></textarea>
+        </div>
+        <button class="btn btn-p" style="margin-top:10px;" onclick="loadManual()">LOAD ASSET →</button>
+      </div>
+    </div>
+
+    <!-- ── INSPECTION PANEL ── -->
+    <div id="insp-panel" style="display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;flex-direction:column;gap:11px;">
+      <div id="insp-loading" class="card"><div class="proc"><div class="spin"></div><div class="proc-lbl">LOADING ASSET…</div></div></div>
+      <div id="insp-body" style="display:none;flex-direction:column;gap:11px;">
+
+        <!-- Asset header + proof -->
+        <div class="card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+            <div>
+              <div id="insp-badge" style="display:inline-flex;align-items:center;gap:5px;background:var(--lime3);border:1px solid var(--lime2);color:var(--lime);font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:.5px;"></div>
+              <div id="insp-name" style="font-family:var(--disp);font-size:20px;font-weight:800;line-height:1.2;"></div>
+              <div id="insp-site" style="font-size:12px;color:var(--t2);margin-top:3px;"></div>
+              <div id="insp-loc"  style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;"></div>
+            </div>
+            <button class="ic" onclick="resetInsp()">✕</button>
+          </div>
+          <div class="proof" style="margin-top:12px;">
+            <div style="font-size:20px;flex-shrink:0;">📍</div>
+            <div>
+              <div class="proof-lbl">SERVICE VERIFICATION ACTIVE</div>
+              <div class="proof-val" id="proof-val">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer info -->
+        <div class="card" id="cust-info-card" style="display:none;">
+          <div class="card-hd">Client / Site</div>
+          <div id="cust-info-body"></div>
+        </div>
+
+        <!-- Inspection fields -->
+        <div class="card">
+          <div class="card-hd lime">Inspection Data</div>
+          <div id="insp-fields" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+
+        <!-- Photos: Activity evidence -->
+        <div class="card">
+          <div class="card-hd">Pest Activity Evidence</div>
+          <div style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.5;">Photograph droppings, gnaw marks, burrows, live/dead pests. Claude AI describes each photo automatically.</div>
+          <div class="photo-strip" id="photos-activity"></div>
+          <input type="file" id="pi-activity" accept="image/*" capture="environment" style="display:none;" onchange="handleInspPhoto(event,'activity')">
+        </div>
+
+        <!-- Photos: Conducive conditions -->
+        <div class="card">
+          <div class="card-hd amb">Conducive Conditions</div>
+          <div style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.5;">Photograph entry points, harbourage areas, food/water sources, structural issues. AI drafts the recommendation text for you.</div>
+          <div class="photo-strip" id="photos-conditions"></div>
+          <input type="file" id="pi-conditions" accept="image/*" capture="environment" style="display:none;" onchange="handleInspPhoto(event,'conditions')">
+        </div>
+
+        <!-- Products applied -->
+        <div class="card">
+          <div class="card-hd">Products Applied</div>
+          <div id="products-used" style="display:flex;flex-direction:column;gap:7px;margin-bottom:8px;"></div>
+          <button class="btn btn-s btn-sm" onclick="openAddProductModal()">➕ ADD PRODUCT</button>
+        </div>
+
+        <!-- Voice + AI -->
+        <div class="card">
+          <div class="card-hd">Voice Notes</div>
+          <div id="transcript" class="emp">Tap record and speak your findings…</div>
+          <div style="margin-top:9px;display:flex;flex-direction:column;gap:7px;">
+            <button class="recbtn" id="rec-btn" onclick="toggleRec()">
+              <span id="rec-ico">🎙️</span><span id="rec-lbl">TAP TO RECORD</span>
+            </button>
+            <div style="display:flex;gap:7px;">
+              <button class="btn btn-s btn-sm" style="flex:1;" onclick="clearTx()">CLEAR</button>
+              <button class="btn btn-p btn-sm" style="flex:2;" onclick="runAI()">✨ AI EXTRACT</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI processing -->
+        <div id="ai-proc" style="display:none;" class="card">
+          <div class="proc"><div class="spin"></div><div class="proc-lbl" id="ai-proc-lbl">PROCESSING…</div></div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+          <div class="card-hd amb">Recommendations</div>
+          <div class="frow">
+            <div class="flbl">Findings & Recommendations</div>
+            <textarea class="finp finp-body" id="recommendations" rows="4" placeholder="Conducive conditions observed and recommended corrective actions…"></textarea>
+          </div>
+          <div class="frow" style="margin-top:9px;">
+            <div class="flbl">Ongoing Site Recommendations</div>
+            <textarea class="finp finp-body" id="ongoing-recs" rows="3" placeholder="Recurring issues and long-term recommendations for this site…"></textarea>
+          </div>
+        </div>
+
+        <!-- Technician -->
+        <div class="card">
+          <div class="card-hd">Technician Sign-Off</div>
+          <div class="fgrid2">
+            <div class="frow"><div class="flbl">Your Name</div><input class="finp" id="tech-name" placeholder="e.g. Ryan" autocorrect="off"></div>
+            <div class="frow"><div class="flbl">Licence No.</div><input class="finp" id="tech-lic" placeholder="e.g. PL-12345" autocorrect="off"></div>
+          </div>
+          <div class="frow" style="margin-top:9px;">
+            <div class="flbl">Additional Notes</div>
+            <textarea class="finp finp-body" id="extra-notes" rows="2" placeholder="Any other observations…"></textarea>
+          </div>
+        </div>
+
+        <!-- Save button -->
+        <button class="btn btn-p" id="save-btn" onclick="saveInspection()"><span style="font-size:15px;">✓</span> SAVE SERVICE RECORD</button>
+        <div id="insp-saving" style="display:none;" class="card"><div class="proc"><div class="spin"></div><div class="proc-lbl">SAVING…</div></div></div>
+        <div id="insp-suc" style="display:none;" class="suc">
+          <span style="font-size:30px;">✅</span>
+          <div><div class="suc-ttl">SERVICE RECORDED</div><div class="suc-sub" id="suc-sub"></div></div>
+        </div>
+        <div id="insp-post" style="display:none;flex-direction:column;gap:8px;">
+          <button class="btn btn-amb" onclick="viewReport(null)"><span>📄</span> VIEW / SHARE REPORT</button>
+          <button class="btn btn-p" onclick="resetInsp()"><span>📷</span> SCAN NEXT ASSET</button>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /scan screen -->
+
+  <!-- ═══════════ CUSTOMERS SCREEN ═══════════ -->
+  <div id="scr-customers" class="scr">
+    <div class="scroll">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);">CLIENTS & SITES</div>
+        <button class="btn btn-p btn-sm" style="width:auto;padding:0 14px;" onclick="openAddCust()">+ ADD CLIENT</button>
+      </div>
+      <div id="cust-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ASSETS SCREEN ═══════════ -->
+  <div id="scr-assets" class="scr">
+    <div class="scroll">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);">ASSET REGISTER</div>
+        <button class="btn btn-p btn-sm" style="width:auto;padding:0 14px;" onclick="openAddAsset()">+ NEW ASSET</button>
+      </div>
+      <div class="filter-row">
+        <button class="fbtn on" id="af-all"    onclick="filterAssets('all')">ALL</button>
+        <button class="fbtn"    id="af-rodent" onclick="filterAssets('rodent')">🐀 RODENT</button>
+        <button class="fbtn"    id="af-ilt"    onclick="filterAssets('ilt')">💡 ILT</button>
+      </div>
+      <div id="asset-list"></div>
+      <button class="btn btn-s btn-sm" onclick="printAllLabels()">🖨️ PRINT ALL QR LABELS</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ HISTORY SCREEN ═══════════ -->
+  <div id="scr-history" class="scr">
+    <div class="scroll">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);">SERVICE HISTORY</div>
+        <div id="hist-count" style="font-family:var(--mono);font-size:10px;color:var(--t3);"></div>
+      </div>
+      <div id="hist-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SETTINGS SCREEN ═══════════ -->
+  <div id="scr-settings" class="scr">
+    <div class="scroll">
+      <div class="card">
+        <div class="card-hd">Business Details</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow"><div class="flbl">Business Name</div><input class="finp" id="s-biz" value="EcoSafe Pest Control"></div>
+          <div class="frow"><div class="flbl">ABN</div><input class="finp" id="s-abn" placeholder="e.g. 12 345 678 901" autocorrect="off"></div>
+          <div class="frow"><div class="flbl">Pest Management Licence</div><input class="finp" id="s-lic" placeholder="e.g. PL-12345" autocorrect="off"></div>
+          <div class="frow"><div class="flbl">Default Technician Name</div><input class="finp" id="s-tech" placeholder="e.g. Ryan" autocorrect="off"></div>
+          <div class="frow"><div class="flbl">Phone</div><input class="finp" id="s-phone" placeholder="e.g. 0400 000 000" type="tel"></div>
+          <div class="frow"><div class="flbl">Email</div><input class="finp" id="s-email" placeholder="info@ecosafe.com.au" type="email" autocorrect="off" autocapitalize="none"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">Claude AI</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="frow">
+            <div class="flbl">Anthropic API Key</div>
+            <input class="finp" id="s-ant" type="password" placeholder="sk-ant-…" autocorrect="off" autocapitalize="none">
+            <div class="fhelp">console.anthropic.com → API Keys. Powers voice extraction AND photo analysis.</div>
+          </div>
+          <div class="frow">
+            <div class="flbl">AI Context (improves accuracy)</div>
+            <textarea class="finp finp-body" id="s-ctx" rows="3" placeholder="e.g. We use Racumin 50 bait. Stations are Protecta LP. Record activity as None/Low/Medium/High."></textarea>
+          </div>
+          <div class="frow">
+            <div class="flbl">Voice Language</div>
+            <select class="finp" id="s-lang">
+              <option value="en-AU">English (Australian)</option>
+              <option value="en-US">English (US)</option>
+              <option value="en-GB">English (UK)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd">Product Register</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.5;">Save standard products here. Technicians can select them with one tap during inspections.</div>
+        <div id="reg-product-list" style="display:flex;flex-direction:column;gap:7px;margin-bottom:9px;"></div>
+        <button class="btn btn-s btn-sm" onclick="openAddRegProduct()">+ ADD PRODUCT TO REGISTER</button>
+      </div>
+
+      <button class="btn btn-p" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+      <button class="btn btn-s" onclick="exportData()">📤 EXPORT ALL DATA (JSON)</button>
+      <button class="btn btn-red" onclick="clearAll()">🗑 CLEAR ALL DATA</button>
+      <div style="text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3);">EcoSafe Field System v2 · QR + AI + Photos</div>
+    </div>
+  </div>
+
+  <nav>
+    <button class="nb on" id="nb-scan"      onclick="showScr('scan')">      <span class="ni">📷</span><span>Scan</span></button>
+    <button class="nb"    id="nb-customers" onclick="showScr('customers')"> <span class="ni">🏢</span><span>Clients</span></button>
+    <button class="nb"    id="nb-assets"    onclick="showScr('assets')">    <span class="ni">📦</span><span>Assets</span></button>
+    <button class="nb"    id="nb-history"   onclick="showScr('history')">   <span class="ni">📋</span><span>History</span><span class="nbadge" id="hbadge"></span></button>
+    <button class="nb"    id="nb-settings"  onclick="showScr('settings')">  <span class="ni">⚙</span><span>Settings</span></button>
+  </nav>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Add Customer -->
+<div class="mbg" id="m-add-cust">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('m-add-cust')">✕</button>
+    <div class="modal-hd">Add Client / Site</div>
+    <div class="frow"><div class="flbl">Business / Site Name *</div><input class="finp" id="nc-name" placeholder="e.g. Monash University" autocorrect="off"></div>
+    <div class="frow"><div class="flbl">Address</div><input class="finp" id="nc-addr" placeholder="123 Example St, Melbourne VIC" autocorrect="off"></div>
+    <div class="fgrid2">
+      <div class="frow"><div class="flbl">Contact Name</div><input class="finp" id="nc-contact" placeholder="e.g. John Smith" autocorrect="off"></div>
+      <div class="frow"><div class="flbl">Phone</div><input class="finp" id="nc-phone" placeholder="0400 000 000" type="tel"></div>
+    </div>
+    <div class="frow"><div class="flbl">Email</div><input class="finp" id="nc-email" placeholder="john@example.com" type="email" autocorrect="off" autocapitalize="none"></div>
+    <div class="frow"><div class="flbl">Site Type</div>
+      <select class="finp" id="nc-type">
+        <option>Commercial</option><option>Industrial</option><option>Food Facility</option>
+        <option>Retail</option><option>Healthcare</option><option>Educational</option><option>Residential</option><option>Other</option>
+      </select>
+    </div>
+    <div class="frow"><div class="flbl">Site Notes / Hazards</div><textarea class="finp finp-body" id="nc-notes" rows="3" placeholder="Access instructions, chemicals on site, confined spaces, after-hours contact…"></textarea></div>
+    <div class="frow"><div class="flbl">Ongoing Recommendations</div><textarea class="finp finp-body" id="nc-recs" rows="3" placeholder="Standing recommendations that pre-fill on every inspection for this site…"></textarea></div>
+    <button class="btn btn-p" onclick="saveNewCust()">CREATE CLIENT</button>
+  </div>
+</div>
+
+<!-- Add Asset -->
+<div class="mbg" id="m-add-asset">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('m-add-asset')">✕</button>
+    <div class="modal-hd">New Asset</div>
+    <div class="frow"><div class="flbl">Asset Type</div>
+      <select class="finp" id="na-type">
+        <option value="rodent">🐀 Rodent Bait Station</option>
+        <option value="ilt">💡 Insect Light Trap</option>
+      </select>
+    </div>
+    <div class="frow"><div class="flbl">Asset Name / Number *</div><input class="finp" id="na-name" placeholder="e.g. Bait Station #12" autocorrect="off"></div>
+    <div class="frow"><div class="flbl">Assign to Client</div><select class="finp" id="na-cust"><option value="">— No client —</option></select></div>
+    <div class="frow"><div class="flbl">Location Description</div><input class="finp" id="na-loc" placeholder="e.g. NE corner, Plant Room 3" autocorrect="off"></div>
+    <div class="frow"><div class="flbl">Service Frequency</div>
+      <select class="finp" id="na-freq">
+        <option value="7">Weekly</option><option value="14">Fortnightly</option>
+        <option value="28" selected>Monthly</option><option value="90">Quarterly</option>
+      </select>
+    </div>
+    <button class="btn btn-p" onclick="saveNewAsset()">CREATE ASSET + GENERATE QR</button>
+  </div>
+</div>
+
+<!-- Asset detail -->
+<div class="mbg" id="m-asset-detail">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('m-asset-detail')">✕</button>
+    <div class="modal-hd" id="amod-name"></div>
+    <div id="amod-meta" style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:4px;padding-right:36px;"></div>
+    <div style="display:flex;justify-content:center;margin:10px 0;"><canvas id="amod-qr" style="border-radius:8px;"></canvas></div>
+    <div id="amod-url" style="font-family:var(--mono);font-size:9px;color:var(--t3);text-align:center;word-break:break-all;padding:4px;"></div>
+    <div class="btn-row3" style="margin-top:4px;">
+      <button class="btn btn-s btn-sm" onclick="printSingleLabel()">🖨️ PRINT</button>
+      <button class="btn btn-amb btn-sm" onclick="inspectFromModal()">📷 INSPECT</button>
+      <button class="btn btn-red btn-sm" onclick="deleteAsset()">🗑 DELETE</button>
+    </div>
+    <div style="margin-top:10px;">
+      <div class="card-hd">Recent Inspections</div>
+      <div id="amod-hist" style="margin-top:8px;display:flex;flex-direction:column;gap:7px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add product (during inspection) -->
+<div class="mbg" id="m-add-prod">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('m-add-prod')">✕</button>
+    <div class="modal-hd">Add Product Used</div>
+    <div id="reg-picks" style="display:flex;flex-direction:column;gap:6px;"></div>
+    <div class="or"><span>or enter manually</span></div>
+    <div class="frow"><div class="flbl">Product Name *</div><input class="finp" id="ap-name" placeholder="e.g. Racumin 50 Rodenticide" autocorrect="off"></div>
+    <div class="frow"><div class="flbl">APVMA Reg. Number</div><input class="finp" id="ap-apvma" placeholder="e.g. APVMA 12345" autocorrect="off" autocapitalize="characters"></div>
+    <div class="fgrid2">
+      <div class="frow"><div class="flbl">Rate / Dilution</div><input class="finp" id="ap-rate" placeholder="e.g. 50g per station" autocorrect="off"></div>
+      <div class="frow"><div class="flbl">Target Pest</div><input class="finp" id="ap-pest" placeholder="e.g. Norway Rat" autocorrect="off"></div>
+    </div>
+    <button class="btn btn-p" onclick="addProdToInsp()">ADD PRODUCT</button>
+  </div>
+</div>
+
+<!-- Add product to register (settings) -->
+<div class="mbg" id="m-add-reg-prod">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal('m-add-reg-prod')">✕</button>
+    <div class="modal-hd">Add to Product Register</div>
+    <div class="frow"><div class="flbl">Product Name *</div><input class="finp" id="rp-name" placeholder="e.g. Racumin 50 Rodenticide" autocorrect="off"></div>
+    <div class="frow"><div class="flbl">APVMA Reg. Number</div><input class="finp" id="rp-apvma" placeholder="e.g. APVMA 12345" autocorrect="off" autocapitalize="characters"></div>
+    <div class="fgrid2">
+      <div class="frow"><div class="flbl">Default Rate</div><input class="finp" id="rp-rate" placeholder="e.g. 50g per station" autocorrect="off"></div>
+      <div class="frow"><div class="flbl">Target Pest</div><input class="finp" id="rp-pest" placeholder="e.g. Norway Rat" autocorrect="off"></div>
+    </div>
+    <button class="btn btn-p" onclick="saveRegProduct()">SAVE TO REGISTER</button>
+  </div>
+</div>
+
+<!-- Photo lightbox -->
+<div id="lb-bg" onclick="document.getElementById('lb-bg').classList.remove('open')">
+  <button id="lb-x">✕</button>
+  <img id="lb-img" src="" alt="">
+  <div id="lb-cap"></div>
+</div>
+
+<!-- Report view -->
+<div id="rpt-view">
+  <div class="rpt-hdr">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+      <div>
+        <div class="rpt-title" id="rpt-title">Service Report</div>
+        <div class="rpt-sub-txt" id="rpt-sub"></div>
+      </div>
+      <button class="ic" onclick="closeReport()">✕</button>
+    </div>
+    <div class="rpt-actions">
+      <button class="btn btn-p btn-sm" style="width:auto;padding:0 14px;" onclick="window.print()">🖨️ PRINT / SAVE PDF</button>
+      <button class="btn btn-s btn-sm" style="width:auto;padding:0 14px;" onclick="copyRptLink()">🔗 COPY SHARE LINK</button>
+    </div>
+  </div>
+  <div class="rpt-body" id="rpt-body"></div>
+</div>
+
+<div id="print-sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  ASSET TYPE DEFINITIONS
+// ═══════════════════════════════════════════════════
+const TYPES = {
+  rodent:{label:'Rodent Bait Station',icon:'🐀',fields:[
+    {key:'activity',   label:'Activity Level',   type:'level'},
+    {key:'consumption',label:'Bait Consumption', type:'select',options:['0%','25%','50%','75%','100%']},
+    {key:'treatment',  label:'Treatment',        type:'select',options:['None','Bait replenished','Bait block replaced','Station cleaned','Station replaced']},
+    {key:'condition',  label:'Station Condition',type:'select',options:['Good','Fair','Damaged','Tampered','Missing']},
+    {key:'bait',       label:'Bait Product',     type:'text',  ph:'e.g. Racumin 50'},
+  ]},
+  ilt:{label:'Insect Light Trap',icon:'💡',fields:[
+    {key:'activity',  label:'Insect Activity',  type:'level'},
+    {key:'count',     label:'Catch Count',      type:'text',  ph:'e.g. 12'},
+    {key:'species',   label:'Primary Species',  type:'text',  ph:'e.g. Blowfly, Moth'},
+    {key:'glue',      label:'Glue Board',       type:'select',options:['OK','Changed','Due for change']},
+    {key:'lamp',      label:'UV Lamp',          type:'select',options:['OK','Replaced','Due for replacement']},
+    {key:'condition', label:'Unit Condition',   type:'select',options:['Good','Fair','Damaged','Missing']},
+  ]},
+};
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+const D = {
+  customers:[], assets:[], records:[], products:[],
+  cfg:{},
+  cam:{stream:null, scanning:false},
+  insp:{
+    asset:null, fields:{},
+    photos:{activity:[], conditions:[]},
+    usedProducts:[],
+    transcript:'', aiData:null,
+    isRec:false, recog:null,
+    proofTime:null, proofGPS:null,
+    lastUUID:null,
+  },
+  assetFilter:'all',
+  modalAssetUUID:null,
+};
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+window.onload = async () => {
+  loadCfg();
+  await loadAll();
+  renderAll();
+  const p = new URLSearchParams(window.location.search);
+  const qa = p.get('asset'), qr = p.get('report');
+  if (qa) { await delay(400); triggerInsp(qa); }
+  else if (qr) { await delay(400); openReportByUUID(qr); }
+  else setStatus('ok','Ready — scan QR label to begin');
+};
+
+// ═══════════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════════
+async function loadAll() {
+  D.customers = parse(localStorage.getItem('es3_c'), []);
+  D.assets    = parse(localStorage.getItem('es3_a'), []);
+  D.records   = parse(localStorage.getItem('es3_r'), []);
+  D.products  = parse(localStorage.getItem('es3_p'), []);
+  try {
+    const merge = async (key, arr) => {
+      try {
+        const res = await window.storage.get(key);
+        if (!res) return arr;
+        const cloud = JSON.parse(res.value);
+        const map = {}; arr.forEach(x => map[x.uuid]=x); cloud.forEach(x => map[x.uuid]=x);
+        return Object.values(map);
+      } catch(e) { return arr; }
+    };
+    D.customers = await merge('es3:c', D.customers);
+    D.assets    = await merge('es3:a', D.assets);
+    D.records   = await merge('es3:r', D.records);
+    D.products  = await merge('es3:p', D.products);
+    D.records.sort((a,b) => b.timestamp - a.timestamp);
+  } catch(e) {}
+  saveLocal();
+}
+function saveLocal() {
+  localStorage.setItem('es3_c', JSON.stringify(D.customers));
+  localStorage.setItem('es3_a', JSON.stringify(D.assets));
+  localStorage.setItem('es3_r', JSON.stringify(D.records));
+  localStorage.setItem('es3_p', JSON.stringify(D.products));
+}
+async function saveCloud() {
+  try {
+    await window.storage.set('es3:c', JSON.stringify(D.customers));
+    await window.storage.set('es3:a', JSON.stringify(D.assets));
+    await window.storage.set('es3:r', JSON.stringify(D.records));
+    await window.storage.set('es3:p', JSON.stringify(D.products));
+  } catch(e) {}
+}
+async function persist() { saveLocal(); await saveCloud(); }
+
+// ═══════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════
+function showScr(name) {
+  document.querySelectorAll('.scr').forEach(s => s.className='scr');
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('scr-'+name).className='scr on';
+  const nb=document.getElementById('nb-'+name); if(nb) nb.classList.add('on');
+  if(name!=='scan') stopCamera();
+  if(name==='history') renderHistory();
+  if(name==='assets') renderAssets();
+  if(name==='customers') renderCustomers();
+  if(name==='settings') renderRegProducts();
+}
+function renderAll() { renderCustomers(); renderAssets(); renderHistory(); renderRegProducts(); updateBadge(); }
+function toggleMode() {
+  const isA = document.getElementById('mode-pill').textContent==='ADMIN';
+  document.getElementById('mode-pill').textContent = isA?'TECH':'ADMIN';
+  document.getElementById('mode-pill').className   = 'pill '+(isA?'pill-tech':'pill-admin');
+  showScr(isA?'scan':'assets');
+}
+
+// ═══════════════════════════════════════════════════
+//  SCAN TABS
+// ═══════════════════════════════════════════════════
+function setTab(tab) {
+  ['live','photo','manual'].forEach(t => {
+    document.getElementById('stab-'+t).classList.toggle('on', t===tab);
+    const el=document.getElementById('tab-'+t);
+    el.style.display = t===tab?'flex':'none';
+    el.style.flexDirection='column';
+  });
+  if(tab!=='live') stopCamera();
+}
+
+// ═══════════════════════════════════════════════════
+//  LIVE CAMERA
+// ═══════════════════════════════════════════════════
+async function startCamera() {
+  setStatus('go','Requesting camera…');
+  document.getElementById('cam-err').style.display='none';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}});
+    D.cam.stream=stream;
+    const v=document.getElementById('cam-video'); v.srcObject=stream; await v.play();
+    document.getElementById('cam-wrap').style.display='block';
+    document.getElementById('cam-idle').style.display='none';
+    D.cam.scanning=true;
+    setStatus('go','Scanning — point at QR label');
+    scanFrame();
+  } catch(err) {
+    const msg=err.name==='NotAllowedError'?'Camera permission denied. Tap AA in Safari address bar → Website Settings → Camera → Allow, then reload.':err.message;
+    const el=document.getElementById('cam-err'); el.style.display=''; el.textContent=msg;
+    setStatus('err','Camera unavailable — use Glasses or Manual tab');
+  }
+}
+function stopCamera() {
+  D.cam.scanning=false;
+  if(D.cam.stream){D.cam.stream.getTracks().forEach(t=>t.stop());D.cam.stream=null;}
+  document.getElementById('cam-wrap').style.display='none';
+  document.getElementById('cam-idle').style.display='block';
+}
+function scanFrame() {
+  if(!D.cam.scanning) return;
+  const v=document.getElementById('cam-video'),c=document.getElementById('cam-canvas');
+  if(v.readyState<2){requestAnimationFrame(scanFrame);return;}
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(v,0,0);
+  if('BarcodeDetector' in window){
+    createImageBitmap(c).then(bmp=>
+      new BarcodeDetector({formats:['qr_code']}).detect(bmp).then(codes=>{
+        for(const code of codes){const u=extractUUID(code.rawValue);if(u){onQR(u);return;}}
+        if(D.cam.scanning)setTimeout(()=>requestAnimationFrame(scanFrame),150);
+      }).catch(()=>jsqrFrame(ctx,c))
+    );
+  } else if(window.jsQR){jsqrFrame(ctx,c);}
+  else if(D.cam.scanning) setTimeout(()=>requestAnimationFrame(scanFrame),300);
+}
+function jsqrFrame(ctx,canvas) {
+  const id=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const r=jsQR(id.data,id.width,id.height,{inversionAttempts:'dontInvert'});
+  if(r){const u=extractUUID(r.data);if(u){onQR(u);return;}}
+  if(D.cam.scanning)setTimeout(()=>requestAnimationFrame(scanFrame),150);
+}
+function onQR(uuid){D.cam.scanning=false;stopCamera();triggerInsp(uuid);}
+
+// ═══════════════════════════════════════════════════
+//  GLASSES PHOTO
+// ═══════════════════════════════════════════════════
+async function handleGlassesPhoto(e) {
+  const file=e.target.files[0];if(!file)return;e.target.value='';
+  document.getElementById('qr-debug').style.display='none';
+  const ppi=document.getElementById('ppi'), ppw=document.getElementById('ppw'), pb=document.getElementById('photo-badge');
+  ppi.src=URL.createObjectURL(file); ppw.style.display='block';
+  pb.className='pbadge sc'; pb.textContent='SCANNING…';
+  setStatus('go','Reading photo QR…'); await delay(100);
+  const uuid=await decodePhotoQR(file);
+  if(uuid){pb.className='pbadge ok';pb.textContent='✓ FOUND';setStatus('ok','QR found!');await delay(300);triggerInsp(uuid);}
+  else{pb.className='pbadge fl';pb.textContent='✗ NOT FOUND';setStatus('err','QR not decoded — try closer (20–30cm)');toast('QR not found. Get closer to label and try again.');}
+}
+async function decodePhotoQR(file) {
+  return new Promise(resolve => {
+    const img=new Image();
+    img.onload=()=>{
+      const W=img.width,H=img.height,cv=document.createElement('canvas');
+      const ctx=cv.getContext('2d',{willReadFrequently:true});
+      const TARGET=600;
+      const crops=[[.5,.5,1,1],[.5,.5,.6,.6],[.5,.5,.4,.4],[.5,.5,.25,.25],[.5,.5,.15,.15],[.5,.4,.4,.4],[.5,.6,.4,.4],[.4,.5,.4,.4],[.6,.5,.4,.4]];
+      const filters=['none','contrast(2) brightness(0.85)','contrast(3) brightness(0.65)'];
+      if(window.jsQR){
+        for(const[cx,cy,cw,ch]of crops){
+          const sx=Math.round((cx-cw/2)*W),sy=Math.round((cy-ch/2)*H),sw=Math.round(cw*W),sh=Math.round(ch*H);
+          const sc=TARGET/Math.max(sw,sh);
+          cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);
+          for(const f of filters){
+            ctx.filter=f;ctx.drawImage(img,sx,sy,sw,sh,0,0,cv.width,cv.height);ctx.filter='none';
+            const id=ctx.getImageData(0,0,cv.width,cv.height);
+            for(const inv of['dontInvert','attemptBoth','invertFirst']){
+              const r=jsQR(id.data,id.width,id.height,{inversionAttempts:inv});
+              if(r?.data){const u=extractUUID(r.data);if(u){resolve(u);return;}showQRDebug(r.data);resolve(null);return;}
+            }
+          }
+        }
+      }
+      if('BarcodeDetector' in window){
+        createImageBitmap(img).then(bmp=>new BarcodeDetector({formats:['qr_code']}).detect(bmp).then(codes=>{
+          for(const c of codes){const u=extractUUID(c.rawValue);if(u){resolve(u);return;}showQRDebug(c.rawValue);}
+          resolve(null);
+        }).catch(()=>resolve(null))).catch(()=>resolve(null));
+      } else resolve(null);
+    };
+    img.onerror=()=>resolve(null);
+    img.src=URL.createObjectURL(file);
+  });
+}
+function showQRDebug(raw){document.getElementById('qr-debug-txt').textContent=raw;document.getElementById('qr-debug').style.display='';document.getElementById('manual-uuid').value=raw;}
+function loadManual(){
+  const v=document.getElementById('manual-uuid').value.trim();
+  const u=extractUUID(v)||(v.match(/^[0-9a-f-]{36}$/i)?v:null);
+  if(!u){toast('Invalid UUID format');return;}triggerInsp(u);
+}
+function extractUUID(t){
+  if(!t)return null;
+  let m=t.match(/[?&]asset=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);if(m)return m[1];
+  m=t.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);return m?m[1]:null;
+}
+
+// ═══════════════════════════════════════════════════
+//  INSPECTION
+// ═══════════════════════════════════════════════════
+async function triggerInsp(uuid) {
+  const asset=D.assets.find(a=>a.uuid===uuid);
+  document.getElementById('stabs').style.display='none';
+  ['live','photo','manual'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  const ip=document.getElementById('insp-panel');
+  ip.style.display='flex';ip.style.flexDirection='column';
+  document.getElementById('insp-loading').style.display='';
+  document.getElementById('insp-body').style.display='none';
+  if(!asset){
+    await delay(200);
+    document.getElementById('insp-loading').style.display='none';
+    document.getElementById('insp-body').style.display='flex';
+    document.getElementById('insp-body').style.flexDirection='column';
+    document.getElementById('insp-badge').textContent='❓ UNKNOWN';
+    document.getElementById('insp-name').textContent='Asset not registered';
+    document.getElementById('insp-site').textContent='UUID: '+uuid;
+    setStatus('err','Unknown asset — add it in Assets tab first');
+    toast('Asset not found — create it in the Assets tab');
+    return;
+  }
+  D.insp={...D.insp,asset,fields:{},photos:{activity:[],conditions:[]},usedProducts:[],transcript:'',aiData:null,isRec:false,recog:null,proofTime:new Date(),proofGPS:null,lastUUID:null};
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{D.insp.proofGPS={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};},()=>{},{timeout:6000});
+  await delay(300);
+  document.getElementById('insp-loading').style.display='none';
+  document.getElementById('insp-body').style.display='flex';
+  document.getElementById('insp-body').style.flexDirection='column';
+  const def=TYPES[asset.type];
+  document.getElementById('insp-badge').textContent=def.icon+' '+def.label;
+  document.getElementById('insp-name').textContent=asset.name;
+  const cust=D.customers.find(c=>c.uuid===asset.customerUUID);
+  document.getElementById('insp-site').textContent=cust?'🏢 '+cust.name:'';
+  document.getElementById('insp-loc').textContent=asset.location?'📍 '+asset.location:'';
+  document.getElementById('proof-val').textContent=
+    D.insp.proofTime.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})+' · '+
+    D.insp.proofTime.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  // Customer card
+  const cc=document.getElementById('cust-info-card'),cb=document.getElementById('cust-info-body');
+  if(cust){
+    cc.style.display='';
+    cb.innerHTML=[
+      `<div style="font-size:14px;font-weight:600;">${cust.name}</div>`,
+      cust.address?`<div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:3px;">📍 ${cust.address}</div>`:'',
+      cust.contact?`<div style="font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:2px;">👤 ${cust.contact}${cust.phone?' · 📞 '+cust.phone:''}</div>`:'',
+      cust.siteType?`<div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;">🏗 ${cust.siteType}</div>`:'',
+      cust.hazards?`<div style="font-size:11px;color:var(--amb);background:var(--amb2);border:1px solid rgba(240,160,48,.3);border-radius:var(--rs);padding:7px 9px;margin-top:7px;">⚠️ ${cust.hazards}</div>`:'',
+    ].filter(Boolean).join('');
+    document.getElementById('ongoing-recs').value=cust.ongoing_recs||'';
+  } else {cc.style.display='none';document.getElementById('ongoing-recs').value='';}
+  // Fields
+  renderInspFields(def);
+  // Photos
+  renderPhotoStrip('activity');renderPhotoStrip('conditions');
+  // Products
+  renderUsedProducts();
+  // Reset voice + form
+  resetVoice();
+  document.getElementById('recommendations').value='';
+  document.getElementById('extra-notes').value='';
+  document.getElementById('tech-name').value=D.cfg.tech||'';
+  document.getElementById('tech-lic').value=D.cfg.lic||'';
+  document.getElementById('ai-proc').style.display='none';
+  document.getElementById('insp-saving').style.display='none';
+  document.getElementById('insp-suc').style.display='none';
+  document.getElementById('insp-post').style.display='none';
+  document.getElementById('save-btn').style.display='';
+  setStatus('ok','Asset loaded — record findings');
+  ip.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderInspFields(def){
+  const c=document.getElementById('insp-fields');c.innerHTML='';
+  def.fields.forEach(f=>{
+    const w=document.createElement('div');w.className='frow';
+    const l=document.createElement('div');l.className='flbl';l.textContent=f.label;w.appendChild(l);
+    if(f.type==='level'){
+      const row=document.createElement('div');row.className='lvls';
+      ['None','Low','Medium','High'].forEach(o=>{
+        const btn=document.createElement('button');btn.className='lvl';btn.textContent=o;
+        btn.onclick=()=>{row.querySelectorAll('.lvl').forEach(b=>b.className='lvl');btn.className='lvl s-'+o.toLowerCase();D.insp.fields[f.key]=o;};
+        row.appendChild(btn);
+      });w.appendChild(row);
+    } else if(f.type==='select'){
+      const sel=document.createElement('select');sel.className='finp';sel.id='if-'+f.key;
+      f.options.forEach(o=>{const op=document.createElement('option');op.value=o;op.textContent=o;sel.appendChild(op);});
+      sel.onchange=()=>{D.insp.fields[f.key]=sel.value;};D.insp.fields[f.key]=f.options[0];w.appendChild(sel);
+    } else {
+      const inp=document.createElement('input');inp.className='finp';inp.id='if-'+f.key;
+      inp.placeholder=f.ph||'';inp.autocorrect='off';
+      inp.oninput=()=>{D.insp.fields[f.key]=inp.value;};w.appendChild(inp);
+    }
+    c.appendChild(w);
+  });
+}
+
+function resetInsp(){
+  stopRec();
+  D.insp={asset:null,fields:{},photos:{activity:[],conditions:[]},usedProducts:[],transcript:'',aiData:null,isRec:false,recog:null,proofTime:null,proofGPS:null,lastUUID:null};
+  document.getElementById('insp-panel').style.display='none';
+  document.getElementById('stabs').style.display='flex';
+  setTab('live');setStatus('ok','Ready — scan next QR label');
+}
+
+// ═══════════════════════════════════════════════════
+//  PHOTO CAPTURE + AI VISION
+// ═══════════════════════════════════════════════════
+function renderPhotoStrip(cat){
+  const strip=document.getElementById('photos-'+cat);
+  strip.innerHTML='';
+  const photos=D.insp.photos[cat];
+  photos.forEach((ph,i)=>{
+    const wrap=document.createElement('div');wrap.className='photo-wrap';
+    const img=document.createElement('img');img.className='photo-thumb';img.src=ph.dataUrl;
+    img.onclick=()=>{document.getElementById('lb-img').src=ph.dataUrl;document.getElementById('lb-cap').textContent=ph.caption||'';document.getElementById('lb-bg').classList.add('open');};
+    const del=document.createElement('button');del.className='photo-del';del.textContent='×';
+    del.onclick=(e)=>{e.stopPropagation();photos.splice(i,1);renderPhotoStrip(cat);};
+    wrap.appendChild(img);wrap.appendChild(del);
+    strip.appendChild(wrap);
+    if(ph.analysing){
+      const cap=document.createElement('div');cap.className='ai-cap analysing';cap.textContent='✨ AI analysing photo…';
+      strip.appendChild(cap);
+    } else if(ph.caption){
+      const cap=document.createElement('div');cap.className='ai-cap';cap.textContent=ph.caption;
+      strip.appendChild(cap);
+    }
+  });
+  const add=document.createElement('div');add.className='photo-add';
+  add.innerHTML='<span style="font-size:22px;">📷</span><span>Add Photo</span>';
+  add.onclick=()=>document.getElementById('pi-'+cat).click();
+  strip.appendChild(add);
+}
+
+async function handleInspPhoto(e,cat){
+  const file=e.target.files[0];if(!file)return;e.target.value='';
+  const dataUrl=await fileToDataUrl(file);
+  const idx=D.insp.photos[cat].length;
+  D.insp.photos[cat].push({dataUrl,caption:null,analysing:true});
+  renderPhotoStrip(cat);
+  if(D.cfg.ant){
+    try{
+      const prompt=cat==='activity'
+        ?'You are assisting an Australian pest control technician. Describe the pest activity evidence visible in this photo in 1-2 concise sentences. Be specific about pest type (rodent, insect, etc), signs observed (droppings, gnaw marks, burrows, live/dead pest), and severity. If no evidence visible, state clearly.'
+        :'You are assisting an Australian pest control technician. In 1-2 sentences describe the conducive condition or issue visible. Then on a new line write "Recommendation: " followed by a specific corrective action the client should take.';
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':D.cfg.ant,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:dataUrl.split(',')[1]}},
+          {type:'text',text:prompt}
+        ]}]})
+      });
+      if(res.ok){
+        const data=await res.json();
+        const caption=data.content[0].text.trim();
+        D.insp.photos[cat][idx].caption=caption;
+        D.insp.photos[cat][idx].analysing=false;
+        // Auto-append to recommendations if conditions photo
+        if(cat==='conditions'){
+          const el=document.getElementById('recommendations');
+          el.value=(el.value.trim()?el.value.trim()+'\n\n':'')+caption;
+        }
+      } else {D.insp.photos[cat][idx].analysing=false;}
+    } catch(err){D.insp.photos[cat][idx].analysing=false;toast('AI photo analysis failed');}
+  } else {
+    D.insp.photos[cat][idx].analysing=false;
+    toast('Add Anthropic API key in Settings for AI photo analysis');
+  }
+  renderPhotoStrip(cat);
+}
+
+function fileToDataUrl(file){return new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});}
+
+// ═══════════════════════════════════════════════════
+//  PRODUCTS
+// ═══════════════════════════════════════════════════
+function renderUsedProducts(){
+  const el=document.getElementById('products-used');
+  el.innerHTML=D.insp.usedProducts.length
+    ?D.insp.usedProducts.map((p,i)=>`
+      <div class="prod-item">
+        <div class="prod-info">
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-detail">${p.apvma?'📋 '+p.apvma:''}${p.apvma&&(p.rate||p.pest)?' · ':''}${p.rate||''}${p.rate&&p.pest?' → ':''}${p.pest||''}</div>
+        </div>
+        <button class="prod-del" onclick="D.insp.usedProducts.splice(${i},1);renderUsedProducts();">×</button>
+      </div>`).join('')
+    :'<div style="font-size:11px;color:var(--t3);font-family:var(--mono);">No products added yet</div>';
+}
+
+function openAddProductModal(){
+  const picks=document.getElementById('reg-picks');
+  picks.innerHTML=D.products.length
+    ?`<div style="font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;">From your register</div>`+
+      D.products.map(p=>`<button class="btn btn-s btn-sm" onclick="quickAddProduct('${p.uuid}')" style="justify-content:flex-start;gap:8px;font-size:11px;font-family:var(--mono);">
+        <span>⚡</span><span>${p.name}${p.apvma?' · '+p.apvma:''}</span></button>`).join('')
+    :'<div style="font-size:11px;color:var(--t3);font-family:var(--mono);">No products in register — add them in Settings.</div>';
+  ['ap-name','ap-apvma','ap-rate','ap-pest'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-add-prod').classList.add('open');
+}
+function quickAddProduct(uuid){
+  const p=D.products.find(x=>x.uuid===uuid);if(!p)return;
+  D.insp.usedProducts.push({...p});renderUsedProducts();
+  closeModal('m-add-prod');toast('Added: '+p.name);
+}
+function addProdToInsp(){
+  const name=document.getElementById('ap-name').value.trim();
+  if(!name){toast('Enter a product name');return;}
+  D.insp.usedProducts.push({uuid:genUUID(),name,apvma:document.getElementById('ap-apvma').value.trim(),rate:document.getElementById('ap-rate').value.trim(),pest:document.getElementById('ap-pest').value.trim()});
+  renderUsedProducts();closeModal('m-add-prod');
+}
+
+// ═══════════════════════════════════════════════════
+//  VOICE
+// ═══════════════════════════════════════════════════
+function toggleRec(){D.insp.isRec?stopRec():startRec();}
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice recognition requires Safari on iPhone');return;}
+  const r=new SR();r.continuous=true;r.interimResults=true;r.lang=D.cfg.lang||'en-AU';
+  let final=D.insp.transcript||'';
+  r.onresult=ev=>{let int='';for(let i=ev.resultIndex;i<ev.results.length;i++){if(ev.results[i].isFinal)final+=ev.results[i][0].transcript+' ';else int+=ev.results[i][0].transcript;}
+    const el=document.getElementById('transcript');el.className='rec';el.textContent=final+int;D.insp.transcript=final;};
+  r.onerror=ev=>{if(ev.error!=='no-speech')toast('🎙 '+ev.error);};
+  r.onend=()=>{if(D.insp.isRec)r.start();};
+  r.start();D.insp.recog=r;D.insp.isRec=true;
+  document.getElementById('rec-btn').classList.add('on');
+  document.getElementById('rec-lbl').textContent='RECORDING — TAP TO STOP';
+  document.getElementById('rec-ico').textContent='⏹';
+  const el=document.getElementById('transcript');el.className='rec';if(!D.insp.transcript)el.textContent='…';
+}
+function stopRec(){
+  if(D.insp.recog){D.insp.recog.stop();D.insp.recog=null;}
+  D.insp.isRec=false;
+  document.getElementById('rec-btn').classList.remove('on');
+  document.getElementById('rec-lbl').textContent='TAP TO RECORD MORE';
+  document.getElementById('rec-ico').textContent='🎙️';
+  document.getElementById('transcript').classList.remove('rec');
+  if(!D.insp.transcript.trim()){const el=document.getElementById('transcript');el.className='emp';el.textContent='Tap record and speak findings…';}
+}
+function resetVoice(){
+  if(D.insp.recog){D.insp.recog.stop();D.insp.recog=null;}
+  D.insp.isRec=false;D.insp.transcript='';
+  document.getElementById('rec-btn').classList.remove('on');
+  document.getElementById('rec-lbl').textContent='TAP TO RECORD';
+  document.getElementById('rec-ico').textContent='🎙️';
+  const el=document.getElementById('transcript');el.className='emp';el.textContent='Tap record and speak findings…';
+}
+function clearTx(){D.insp.transcript='';resetVoice();}
+
+// ═══════════════════════════════════════════════════
+//  AI EXTRACTION
+// ═══════════════════════════════════════════════════
+async function runAI(){
+  if(!D.insp.transcript.trim()){toast('Record something first');return;}
+  document.getElementById('ai-proc').style.display='';
+  document.getElementById('ai-proc').scrollIntoView({behavior:'smooth',block:'start'});
+  setStatus('go','AI extracting…');
+  const def=TYPES[D.insp.asset?.type];
+  const fieldList=def?.fields.map(f=>`"${f.label}": ${f.type==='level'?'None|Low|Medium|High':f.type==='select'?f.options.join('|'):f.ph||'text'}`).join('\n')||'';
+  const prompt=`You are a data extraction assistant for ${D.cfg.biz||'EcoSafe Pest Control'}, Australian pest control.\n${D.cfg.ctx?'Context: '+D.cfg.ctx+'\n':''}\nAsset: ${D.insp.asset?.name} (${def?.label})\nFields:\n${fieldList}\n\nTranscript: "${D.insp.transcript.trim()}"\n\nReturn ONLY valid JSON with field labels as keys, null for unmentioned. No markdown.`;
+  try{
+    let result;
+    if(!D.cfg.ant){await delay(600);result=demoExtract(D.insp.transcript,def?.fields||[]);toast('Demo AI — add API key in Settings');}
+    else{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':D.cfg.ant,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+      if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'AI error');}
+      const data=await res.json();
+      result=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim());
+    }
+    D.insp.aiData=result;
+    def?.fields.forEach(f=>{
+      if(result[f.label]!=null){
+        D.insp.fields[f.key]=result[f.label];
+        const el=document.getElementById('if-'+f.key);if(el)el.value=result[f.label];
+        if(f.type==='level'){
+          const val=result[f.label];
+          document.querySelectorAll('#insp-fields .lvl').forEach(b=>{if(b.textContent===val)b.className='lvl s-'+val.toLowerCase();else b.className='lvl';});
+        }
+      }
+    });
+    document.getElementById('ai-proc').style.display='none';
+    setStatus('ok','AI extraction done — review fields above');
+    toast('✨ Fields populated — check before saving');
+  } catch(err){document.getElementById('ai-proc').style.display='none';setStatus('err','AI failed');toast('AI error: '+err.message.slice(0,60));}
+}
+
+// ═══════════════════════════════════════════════════
+//  SAVE INSPECTION
+// ═══════════════════════════════════════════════════
+async function saveInspection(){
+  const asset=D.insp.asset;if(!asset)return;
+  const def=TYPES[asset.type];
+  def?.fields.forEach(f=>{const el=document.getElementById('if-'+f.key);if(el&&el.value)D.insp.fields[f.key]=el.value;});
+  document.getElementById('save-btn').style.display='none';
+  document.getElementById('insp-saving').style.display='';
+  const rec={
+    uuid:genUUID(),assetUUID:asset.uuid,assetName:asset.name,assetType:asset.type,
+    customerUUID:asset.customerUUID||null,
+    siteName:D.customers.find(c=>c.uuid===asset.customerUUID)?.name||'',
+    location:asset.location||'',
+    fields:{...D.insp.fields},
+    photos:{
+      activity:D.insp.photos.activity.map(p=>({dataUrl:p.dataUrl,caption:p.caption})),
+      conditions:D.insp.photos.conditions.map(p=>({dataUrl:p.dataUrl,caption:p.caption})),
+    },
+    products:[...D.insp.usedProducts],
+    transcript:D.insp.transcript,
+    recommendations:document.getElementById('recommendations').value.trim(),
+    ongoingRecs:document.getElementById('ongoing-recs').value.trim(),
+    notes:document.getElementById('extra-notes').value.trim(),
+    tech:document.getElementById('tech-name').value.trim()||D.cfg.tech||'Unknown',
+    techLic:document.getElementById('tech-lic').value.trim()||D.cfg.lic||'',
+    timestamp:Date.now(),
+    proofTime:D.insp.proofTime?.toISOString(),
+    proofGPS:D.insp.proofGPS,
+    biz:D.cfg.biz||'EcoSafe Pest Control',
+    bizABN:D.cfg.abn||'',
+    bizLic:D.cfg.lic||'',
+    bizPhone:D.cfg.phone||'',
+    bizEmail:D.cfg.email||'',
+  };
+  D.insp.lastUUID=rec.uuid;
+  D.records.unshift(rec);
+  const ai=D.assets.findIndex(a=>a.uuid===asset.uuid);
+  if(ai>=0)D.assets[ai].lastServiced=rec.timestamp;
+  await persist();
+  document.getElementById('insp-saving').style.display='none';
+  document.getElementById('insp-suc').style.display='flex';
+  document.getElementById('insp-post').style.display='flex';
+  document.getElementById('insp-post').style.flexDirection='column';
+  document.getElementById('suc-sub').textContent=rec.assetName+' · '+fmtTime(rec.timestamp)+(rec.proofGPS?' · GPS ✓':'');
+  setStatus('ok','Service record saved ✓');
+  renderHistory();updateBadge();
+}
+
+// ═══════════════════════════════════════════════════
+//  REPORT
+// ═══════════════════════════════════════════════════
+function viewReport(uuid){
+  const u=uuid||D.insp.lastUUID;
+  const rec=D.records.find(r=>r.uuid===u);
+  if(!rec){toast('Report not found');return;}
+  openReportByUUID(u);
+}
+function openReportByUUID(uuid){
+  const rec=D.records.find(r=>r.uuid===uuid);
+  if(!rec){toast('Record not found');return;}
+  const def=TYPES[rec.assetType]||{label:'Asset',icon:'📦',fields:[]};
+  const cust=D.customers.find(c=>c.uuid===rec.customerUUID);
+  document.getElementById('rpt-title').textContent=rec.assetName;
+  document.getElementById('rpt-sub').textContent=(rec.siteName?rec.siteName+' · ':'')+fmtDate(rec.timestamp)+(rec.location?' · '+rec.location:'');
+  const body=document.getElementById('rpt-body');
+  const html=[];
+
+  // Business header
+  html.push(`<div class="rpt-sec"><div class="rpt-sec-hd lime">Service Report — ${rec.biz||'EcoSafe Pest Control'}</div>
+    <div class="rpt-sec-body">
+      <div class="rpt-row"><div class="rpt-k">Business</div><div class="rpt-v">${rec.biz||'EcoSafe Pest Control'}</div></div>
+      ${rec.bizABN?`<div class="rpt-row"><div class="rpt-k">ABN</div><div class="rpt-v">${rec.bizABN}</div></div>`:''}
+      ${rec.bizLic?`<div class="rpt-row"><div class="rpt-k">Licence</div><div class="rpt-v">${rec.bizLic}</div></div>`:''}
+      ${rec.bizPhone?`<div class="rpt-row"><div class="rpt-k">Phone</div><div class="rpt-v">${rec.bizPhone}</div></div>`:''}
+      ${rec.bizEmail?`<div class="rpt-row"><div class="rpt-k">Email</div><div class="rpt-v">${rec.bizEmail}</div></div>`:''}
+      <div class="rpt-row"><div class="rpt-k">Technician</div><div class="rpt-v">${rec.tech||'—'}${rec.techLic?' · Lic: '+rec.techLic:''}</div></div>
+    </div></div>`);
+
+  // Verification
+  html.push(`<div class="rpt-proof">
+    <span style="font-size:22px;">📍</span>
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--lime);font-weight:500;letter-spacing:.5px;">SERVICE VERIFIED</div>
+      <div style="font-size:12px;color:var(--t2);margin-top:2px;">${rec.proofTime?new Date(rec.proofTime).toLocaleString('en-AU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}${rec.proofGPS?` · GPS: ${rec.proofGPS.lat.toFixed(5)}, ${rec.proofGPS.lng.toFixed(5)} (±${rec.proofGPS.acc}m)`:''}</div>
+    </div></div>`);
+
+  // Site info
+  if(rec.siteName||rec.location||cust){
+    html.push(`<div class="rpt-sec"><div class="rpt-sec-hd">Site Information</div><div class="rpt-sec-body">
+      ${rec.siteName?`<div class="rpt-row"><div class="rpt-k">Site</div><div class="rpt-v">${rec.siteName}</div></div>`:''}
+      ${cust?.address?`<div class="rpt-row"><div class="rpt-k">Address</div><div class="rpt-v">${cust.address}</div></div>`:''}
+      ${rec.location?`<div class="rpt-row"><div class="rpt-k">Location</div><div class="rpt-v">${rec.location}</div></div>`:''}
+      ${cust?.contact?`<div class="rpt-row"><div class="rpt-k">Contact</div><div class="rpt-v">${cust.contact}</div></div>`:''}
+      ${cust?.phone?`<div class="rpt-row"><div class="rpt-k">Phone</div><div class="rpt-v">${cust.phone}</div></div>`:''}
+      ${cust?.siteType?`<div class="rpt-row"><div class="rpt-k">Site Type</div><div class="rpt-v">${cust.siteType}</div></div>`:''}
+    </div></div>`);
+  }
+
+  // Inspection data
+  const fieldRows=Object.entries(rec.fields||{}).filter(([,v])=>v).map(([k,v])=>{
+    const fd=def.fields?.find(f=>f.key===k);
+    const lbl=fd?.label||k;
+    const color=k==='activity'&&v==='High'?'var(--red)':k==='activity'&&v==='Medium'?'var(--amb)':k==='activity'&&v==='None'?'var(--blue)':'inherit';
+    return `<div class="rpt-row"><div class="rpt-k">${lbl}</div><div class="rpt-v" style="color:${color}">${v}</div></div>`;
+  }).join('');
+  html.push(`<div class="rpt-sec"><div class="rpt-sec-hd lime">${def.icon} ${def.label}</div><div class="rpt-sec-body">
+    <div class="rpt-row"><div class="rpt-k">Asset</div><div class="rpt-v">${rec.assetName}</div></div>
+    ${fieldRows}
+  </div></div>`);
+
+  // Activity photos
+  const actPh=(rec.photos?.activity||[]).filter(p=>p.dataUrl);
+  if(actPh.length){
+    html.push(`<div class="rpt-sec"><div class="rpt-sec-hd">Pest Activity Evidence</div><div class="rpt-sec-body">
+      ${actPh.map(p=>`<img class="rpt-photo" src="${p.dataUrl}">${p.caption?`<div class="rpt-cap">${p.caption}</div>`:''}`).join('<div style="height:8px;"></div>')}
+    </div></div>`);
+  }
+
+  // Conducive conditions + recommendations
+  const condPh=(rec.photos?.conditions||[]).filter(p=>p.dataUrl);
+  if(condPh.length||rec.recommendations){
+    html.push(`<div class="rpt-sec"><div class="rpt-sec-hd amb">Conducive Conditions & Recommendations</div><div class="rpt-sec-body">
+      ${condPh.map(p=>`<img class="rpt-photo" src="${p.dataUrl}">${p.caption?`<div class="rpt-cap">${p.caption}</div>`:''}`).join('<div style="height:8px;"></div>')}
+      ${rec.recommendations?`<div style="font-size:13px;color:var(--t2);line-height:1.7;margin-top:${condPh.length?'12px':'0'};">${rec.recommendations.replace(/\n/g,'<br>')}</div>`:''}
+    </div></div>`);
+  }
+
+  // Ongoing recommendations
+  if(rec.ongoingRecs){
+    html.push(`<div class="rpt-sec"><div class="rpt-sec-hd amb">Ongoing Site Recommendations</div><div class="rpt-sec-body">
+      <div style="font-size:13px;color:var(--t2);line-height:1.7;">${rec.ongoingRecs.replace(/\n/g,'<br>')}</div>
+    </div></div>`);
+  }
+
+  // Products
+  if(rec.products?.length){
+    html.push(`<div class="rpt-sec"><div class="rpt-sec-hd">Products Applied</div><div class="rpt-sec-body">
+      ${rec.products.map(p=>`<div class="rpt-row">
+        <div><div style="font-size:13px;font-weight:600;">${p.name}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;">${p.apvma?'📋 '+p.apvma:''}${p.rate?' · '+p.rate:''}${p.pest?' → '+p.pest:''}</div></div>
+      </div>`).join('')}
+    </div></div>`);
+  }
+
+  // Notes
+  if(rec.notes){html.push(`<div class="rpt-sec"><div class="rpt-sec-hd">Additional Notes</div><div class="rpt-sec-body"><div style="font-size:13px;color:var(--t2);line-height:1.7;">${rec.notes}</div></div></div>`);}
+
+  // Footer
+  html.push(`<div style="font-family:var(--mono);font-size:9px;color:var(--t3);text-align:center;padding:8px 0;">Record ID: ${rec.uuid}</div>`);
+
+  body.innerHTML=html.join('');
+  document.getElementById('rpt-view').classList.add('open');
+}
+function closeReport(){document.getElementById('rpt-view').classList.remove('open');}
+function copyRptLink(){
+  const url=window.location.href.split('?')[0]+'?report='+(D.insp.lastUUID||'');
+  navigator.clipboard.writeText(url).then(()=>toast('Link copied!')).catch(()=>{
+    prompt('Copy this link:',url);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  CUSTOMERS
+// ═══════════════════════════════════════════════════
+function renderCustomers(){
+  const el=document.getElementById('cust-list');
+  if(!D.customers.length){el.innerHTML='<div class="empty"><div class="empty-ico">🏢</div><div class="empty-txt">No clients yet.\nTap + ADD CLIENT to get started.</div></div>';return;}
+  el.innerHTML=D.customers.map(c=>{
+    const ac=D.assets.filter(a=>a.customerUUID===c.uuid).length;
+    const rc=D.records.filter(r=>r.customerUUID===c.uuid).length;
+    const init=c.name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?';
+    return `<div class="cust-row" onclick="viewCustomer('${c.uuid}')">
+      <div class="cust-av">${init}</div>
+      <div class="cust-info">
+        <div class="cust-name">${c.name}</div>
+        <div class="cust-sub">${c.siteType||''}${c.siteType&&c.address?' · ':''}${c.address||''}</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--t3);text-align:right;flex-shrink:0;line-height:1.6;">${ac} asset${ac!==1?'s':''}<br>${rc} service${rc!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+function openAddCust(){
+  ['nc-name','nc-addr','nc-contact','nc-phone','nc-email','nc-notes','nc-recs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modal-add-cust')||null;
+  document.getElementById('m-add-cust').classList.add('open');
+}
+async function saveNewCust(){
+  const name=document.getElementById('nc-name').value.trim();if(!name){toast('Enter a business name');return;}
+  const c={uuid:genUUID(),name,address:document.getElementById('nc-addr').value.trim(),contact:document.getElementById('nc-contact').value.trim(),phone:document.getElementById('nc-phone').value.trim(),email:document.getElementById('nc-email').value.trim(),siteType:document.getElementById('nc-type').value,hazards:document.getElementById('nc-notes').value.trim(),ongoing_recs:document.getElementById('nc-recs').value.trim(),created:Date.now()};
+  D.customers.push(c);await persist();closeModal('m-add-cust');renderCustomers();toast('Client created: '+name);
+}
+function viewCustomer(uuid){
+  const c=D.customers.find(x=>x.uuid===uuid);if(!c)return;
+  const lines=[c.name,c.address,c.contact,c.phone].filter(Boolean).join('\n');
+  toast(lines.slice(0,80));
+}
+
+// ═══════════════════════════════════════════════════
+//  ASSETS
+// ═══════════════════════════════════════════════════
+function renderAssets(){
+  const el=document.getElementById('asset-list');
+  let list=D.assets;
+  if(D.assetFilter!=='all')list=list.filter(a=>a.type===D.assetFilter);
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">No assets yet.\nTap + NEW ASSET to create one.</div></div>';return;}
+  const now=Date.now();
+  el.innerHTML=list.map(a=>{
+    const def=TYPES[a.type];
+    const cust=D.customers.find(c=>c.uuid===a.customerUUID);
+    const due=a.lastServiced?(now-a.lastServiced)>a.freq*86400000:true;
+    const bc=!a.lastServiced?'ab-new':due?'ab-due':'ab-ok';
+    const bt=!a.lastServiced?'NEW':due?'DUE':'OK';
+    return `<div class="asset-row" onclick="openAssetModal('${a.uuid}')">
+      <div class="arow-icon">${def?.icon||'📦'}</div>
+      <div class="arow-info">
+        <div class="arow-name">${a.name}</div>
+        <div class="arow-sub">${cust?.name||''}${cust&&a.location?' · ':''}${a.location||''}</div>
+      </div>
+      <div class="abadge ${bc}">${bt}</div>
+    </div>`;
+  }).join('');
+}
+function filterAssets(type){
+  D.assetFilter=type;
+  ['all','rodent','ilt'].forEach(t=>{const b=document.getElementById('af-'+t);if(b)b.className='fbtn'+(t===type?' on':'');});
+  renderAssets();
+}
+function openAddAsset(){
+  ['na-name','na-loc'].forEach(id=>document.getElementById(id).value='');
+  const sel=document.getElementById('na-cust');
+  sel.innerHTML='<option value="">— No client —</option>'+D.customers.map(c=>`<option value="${c.uuid}">${c.name}</option>`).join('');
+  document.getElementById('m-add-asset').classList.add('open');
+}
+async function saveNewAsset(){
+  const name=document.getElementById('na-name').value.trim();if(!name){toast('Enter an asset name');return;}
+  const a={uuid:genUUID(),type:document.getElementById('na-type').value,name,customerUUID:document.getElementById('na-cust').value||null,location:document.getElementById('na-loc').value.trim(),freq:parseInt(document.getElementById('na-freq').value),created:Date.now(),lastServiced:null};
+  D.assets.push(a);await persist();closeModal('m-add-asset');renderAssets();toast('Asset created: '+name);
+  openAssetModal(a.uuid);
+}
+function openAssetModal(uuid){
+  const a=D.assets.find(x=>x.uuid===uuid);if(!a)return;
+  D.modalAssetUUID=uuid;
+  const def=TYPES[a.type];
+  const cust=D.customers.find(c=>c.uuid===a.customerUUID);
+  document.getElementById('amod-name').textContent=a.name;
+  document.getElementById('amod-meta').textContent=(def?.label||'')+' · '+(cust?.name||'No client')+(a.location?' · '+a.location:'');
+  const qrURL=window.location.href.split('?')[0]+'?asset='+a.uuid;
+  document.getElementById('amod-url').textContent=qrURL;
+  QRCode.toCanvas(document.getElementById('amod-qr'),qrURL,{width:200,margin:2,color:{dark:'#0C0F0C',light:'#FFFFFF'}});
+  const recs=D.records.filter(r=>r.assetUUID===uuid).slice(0,4);
+  document.getElementById('amod-hist').innerHTML=recs.length
+    ?recs.map(r=>{const f=Object.entries(r.fields||{}).filter(([,v])=>v).slice(0,3).map(([k,v])=>`${TYPES[r.assetType]?.fields?.find(f=>f.key===k)?.label||k}: ${v}`).join(' · ');return`<div class="card" style="padding:10px 12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="font-size:12px;font-weight:600;">${r.tech||'Unknown'}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--t3);">${fmtTime(r.timestamp)}</div>
+        </div>
+        ${f?`<div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px;">${f}</div>`:''}
+        ${r.proofGPS?'<div style="font-family:var(--mono);font-size:9px;color:var(--lime);margin-top:3px;">✓ GPS verified</div>':''}
+        <button class="btn btn-s btn-sm" onclick="viewReport('${r.uuid}');closeModal('m-asset-detail');" style="margin-top:8px;height:32px;font-size:10px;">VIEW REPORT</button>
+      </div>`}).join('')
+    :'<div class="empty-txt" style="padding:10px 0;">No inspections yet</div>';
+  document.getElementById('m-asset-detail').classList.add('open');
+}
+function inspectFromModal(){
+  const uuid=D.modalAssetUUID;closeModal('m-asset-detail');showScr('scan');triggerInsp(uuid);
+}
+function deleteAsset(){
+  if(!confirm('Delete this asset and all its service records?'))return;
+  D.assets=D.assets.filter(a=>a.uuid!==D.modalAssetUUID);
+  D.records=D.records.filter(r=>r.assetUUID!==D.modalAssetUUID);
+  persist();closeModal('m-asset-detail');renderAssets();toast('Asset deleted');
+}
+
+// ═══════════════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════════════
+function renderHistory(){
+  const el=document.getElementById('hist-list');
+  document.getElementById('hist-count').textContent=D.records.length+' RECORDS';
+  if(!D.records.length){el.innerHTML='<div class="empty"><div class="empty-ico">📋</div><div class="empty-txt">No service records yet</div></div>';return;}
+  el.innerHTML=D.records.slice(0,80).map(r=>{
+    const def=TYPES[r.assetType];
+    const chips=Object.entries(r.fields||{}).filter(([,v])=>v).slice(0,5).map(([k,v])=>{
+      const lbl=def?.fields?.find(f=>f.key===k)?.label||k;
+      return`<div class="chip"><span class="ck">${lbl}: </span><span class="cv">${v}</span></div>`;
+    }).join('');
+    const actThumbs=(r.photos?.activity||[]).filter(p=>p.dataUrl).map(p=>`<img class="hist-thumb" src="${p.dataUrl}" onclick="document.getElementById('lb-img').src='${p.dataUrl}';document.getElementById('lb-cap').textContent='${(p.caption||'').replace(/'/g,"\\'")}';document.getElementById('lb-bg').classList.add('open');">`).join('');
+    const condThumbs=(r.photos?.conditions||[]).filter(p=>p.dataUrl).map(p=>`<img class="hist-thumb" src="${p.dataUrl}" onclick="document.getElementById('lb-img').src='${p.dataUrl}';document.getElementById('lb-cap').textContent='${(p.caption||'').replace(/'/g,"\\'")}';document.getElementById('lb-bg').classList.add('open');">`).join('');
+    return`<div class="hist-item">
+      <div class="hist-top">
+        <div>
+          <div class="hist-name">${r.assetName}</div>
+          <div class="hist-meta">${r.siteName||''}${r.siteName&&r.location?' · ':''}${r.location||''}</div>
+          <div class="hist-meta" style="margin-top:2px;">👤 ${r.tech||'Unknown'}${r.techLic?' · '+r.techLic:''}</div>
+        </div>
+        <div class="hist-ts">${fmtTime(r.timestamp)}</div>
+      </div>
+      ${chips?`<div class="chips">${chips}</div>`:''}
+      ${actThumbs||condThumbs?`<div class="hist-thumbs">${actThumbs}${condThumbs}</div>`:''}
+      ${r.recommendations?`<div class="hist-note">${r.recommendations.slice(0,200)}${r.recommendations.length>200?'…':''}</div>`:''}
+      ${r.proofGPS?`<div class="hist-proof">📍 GPS VERIFIED · ${new Date(r.proofTime||r.timestamp).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})}</div>`:''}
+      <button class="btn btn-s btn-sm" onclick="viewReport('${r.uuid}')" style="height:32px;font-size:10px;margin-top:2px;">📄 VIEW FULL REPORT</button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  PRODUCT REGISTER (Settings)
+// ═══════════════════════════════════════════════════
+function renderRegProducts(){
+  const el=document.getElementById('reg-product-list');
+  if(!D.products.length){el.innerHTML='<div style="font-size:11px;color:var(--t3);font-family:var(--mono);">No products yet</div>';return;}
+  el.innerHTML=D.products.map((p,i)=>`
+    <div class="prod-item">
+      <div class="prod-info">
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-detail">${p.apvma?'📋 '+p.apvma:''}${p.rate?' · '+p.rate:''}${p.pest?' → '+p.pest:''}</div>
+      </div>
+      <button class="prod-del" onclick="D.products.splice(${i},1);persist();renderRegProducts();">×</button>
+    </div>`).join('');
+}
+function openAddRegProduct(){
+  ['rp-name','rp-apvma','rp-rate','rp-pest'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-add-reg-prod').classList.add('open');
+}
+async function saveRegProduct(){
+  const name=document.getElementById('rp-name').value.trim();if(!name){toast('Enter a product name');return;}
+  D.products.push({uuid:genUUID(),name,apvma:document.getElementById('rp-apvma').value.trim(),rate:document.getElementById('rp-rate').value.trim(),pest:document.getElementById('rp-pest').value.trim()});
+  await persist();closeModal('m-add-reg-prod');renderRegProducts();toast('Product saved: '+name);
+}
+
+// ═══════════════════════════════════════════════════
+//  QR LABEL PRINTING
+// ═══════════════════════════════════════════════════
+async function printAllLabels(){
+  if(!D.assets.length){toast('No assets to print');return;}
+  await buildPrintSheet(D.assets);window.print();
+}
+async function printSingleLabel(){
+  const a=D.assets.find(x=>x.uuid===D.modalAssetUUID);if(!a)return;
+  await buildPrintSheet([a]);closeModal('m-asset-detail');await delay(200);window.print();
+}
+async function buildPrintSheet(assets){
+  const sheet=document.getElementById('print-sheet');sheet.innerHTML='';
+  for(const a of assets){
+    const def=TYPES[a.type];const cust=D.customers.find(c=>c.uuid===a.customerUUID);
+    const qrURL=window.location.href.split('?')[0]+'?asset='+a.uuid;
+    const cell=document.createElement('div');cell.className='pcell';
+    const cnv=document.createElement('canvas');
+    await QRCode.toCanvas(cnv,qrURL,{width:120,margin:2,color:{dark:'#000',light:'#fff'}});
+    cell.appendChild(cnv);
+    const pn=document.createElement('div');pn.className='pn';pn.textContent=a.name;
+    const ps=document.createElement('div');ps.className='ps';ps.textContent=(cust?.name||'')+(a.location?' — '+a.location:'');
+    const pt=document.createElement('div');pt.className='pt';pt.textContent=def?.label||'';
+    cell.appendChild(pn);cell.appendChild(ps);cell.appendChild(pt);
+    sheet.appendChild(cell);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════
+function loadCfg(){
+  const c=parse(localStorage.getItem('es3_cfg'),{});
+  D.cfg=c;
+  if(c.biz) document.getElementById('s-biz').value=c.biz;
+  if(c.abn) document.getElementById('s-abn').value=c.abn;
+  if(c.lic) document.getElementById('s-lic').value=c.lic;
+  if(c.tech)document.getElementById('s-tech').value=c.tech;
+  if(c.phone)document.getElementById('s-phone').value=c.phone;
+  if(c.email)document.getElementById('s-email').value=c.email;
+  if(c.ant) document.getElementById('s-ant').value=c.ant;
+  if(c.lang)document.getElementById('s-lang').value=c.lang;
+  if(c.ctx) document.getElementById('s-ctx').value=c.ctx;
+}
+function saveSettings(){
+  D.cfg={biz:document.getElementById('s-biz').value.trim(),abn:document.getElementById('s-abn').value.trim(),lic:document.getElementById('s-lic').value.trim(),tech:document.getElementById('s-tech').value.trim(),phone:document.getElementById('s-phone').value.trim(),email:document.getElementById('s-email').value.trim(),ant:document.getElementById('s-ant').value.trim(),lang:document.getElementById('s-lang').value,ctx:document.getElementById('s-ctx').value.trim()};
+  localStorage.setItem('es3_cfg',JSON.stringify(D.cfg));toast('✅ Settings saved');
+}
+function exportData(){
+  const data={customers:D.customers,assets:D.assets,records:D.records,products:D.products,exported:new Date().toISOString()};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download='ecosafe-data-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function clearAll(){
+  if(!confirm('Delete ALL data? This cannot be undone.'))return;
+  D.customers=[];D.assets=[];D.records=[];D.products=[];
+  persist();renderAll();toast('All data cleared');
+}
+
+// ═══════════════════════════════════════════════════
+//  DEMO AI
+// ═══════════════════════════════════════════════════
+function demoExtract(text,fields){
+  const tl=text.toLowerCase();const r={};
+  fields.forEach(f=>{
+    const n=f.label.toLowerCase();
+    if(n.includes('activity')||n.includes('insect activity'))
+      r[f.label]=tl.match(/no activity|nothing|clear|nil|none/)?'None':tl.match(/heavy|high|significant/)?'High':tl.match(/moderate|medium/)?'Medium':tl.match(/activity|evidence|low|light/)?'Low':null;
+    else if(n.includes('consumption')){const p=tl.match(/(\d+)\s*%/);r[f.label]=p?p[0]:tl.match(/empty|all gone/)?'100%':tl.match(/half/)?'50%':tl.match(/replenish/)?'75%':null;}
+    else if(n.includes('treatment'))r[f.label]=tl.match(/replenish/)?'Bait replenished':tl.match(/replac/)?'Bait block replaced':tl.match(/clean/)?'Station cleaned':'None';
+    else if(n.includes('condition')||n.includes('unit condition'))r[f.label]=tl.match(/good|fine|intact/)?'Good':tl.match(/damage/)?'Damaged':tl.match(/tamper/)?'Tampered':'Good';
+    else if(n.includes('glue'))r[f.label]=tl.match(/chang/)?'Changed':tl.match(/due/)?'Due for change':'OK';
+    else if(n.includes('lamp'))r[f.label]=tl.match(/replac/)?'Replaced':tl.match(/due/)?'Due for replacement':'OK';
+    else r[f.label]=null;
+  });
+  return r;
+}
+
+// ═══════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════
+function genUUID(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16);});}
+function parse(s,fb){try{return JSON.parse(s)||fb;}catch(e){return fb;}}
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+const fmtDate=d=>{try{return new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;}};
+const fmtTime=ts=>{if(!ts)return'';try{const d=new Date(ts),n=new Date();return d.toDateString()===n.toDateString()?d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('en-AU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});}catch(e){return String(ts);}};
+function setStatus(type,msg){document.getElementById('sdot').className='dot'+(type?' '+type:'');document.getElementById('smsg').textContent=msg;}
+function updateBadge(){const n=D.records.length;const b=document.getElementById('hbadge');b.textContent=n>0?n:'';b.style.display=n>0?'flex':'none';}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+let toastT;
+function toast(msg){clearTimeout(toastT);const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');toastT=setTimeout(()=>el.classList.remove('show'),3500);}
+</script>
+</body>
+</html>
