@@ -160,9 +160,12 @@ textarea { resize: vertical; min-height: 65px; }
     <div class="hdr-t">Service Report</div>
     <div class="hdr-s">EcoSafe Pest Control</div>
   </div>
-  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-direction:column;align-items:flex-end">
+    <span id="sync-status" style="font-size:10px;color:#27ae60;display:none;white-space:nowrap"></span>
+    <div style="display:flex;gap:8px">
     <button class="btn btn-s btn-sm" id="adminBtn" onclick="showAdmin()" style="padding:6px 12px;font-size:11px">⚙ Schedule</button>
     <button class="btn btn-s btn-sm" id="homeBtn" onclick="goHome()" style="padding:6px 12px;font-size:11px;display:none">⌂ Home</button>
+    </div>
   </div>
 </div>
 
@@ -654,7 +657,9 @@ function saveSite() {
     S.selectedSite = S.sites.length - 1;
     toast('✓ Site saved');
   }
-  saveState();
+  // Save to cloud (keeps local copy too)
+  var siteToSync = S.sites[S.editingSiteIdx >= 0 ? S.editingSiteIdx : S.sites.length - 1];
+  saveSiteToCloud(siteToSync);
   hideSiteForm();
   renderSiteList();
 }
@@ -1325,7 +1330,7 @@ function openJobReport(job) {
 function markJobDone(jobId) {
   var sched = loadSchedule();
   var job = sched.find(function(j){ return j.id === jobId; });
-  if (job) { job.done = !job.done; saveSchedule(sched); }
+  if (job) { job.done = !job.done; saveSchedule(sched); updateJobInCloud(job.id, {done: job.done}); }
   if (activeTechIdx !== null) showTechJobs(activeTechIdx);
 }
 
@@ -1387,7 +1392,7 @@ function scheduleJob() {
 
   var site = S.sites.find(function(s){ return s.name === siteName; });
   var sched = loadSchedule();
-  sched.push({
+  var newJob = {
     id: Date.now(),
     techName: techName,
     siteName: siteName,
@@ -1397,8 +1402,10 @@ function scheduleJob() {
     notes: notes,
     done: false,
     active: true
-  });
+  };
+  sched.push(newJob);
   saveSchedule(sched);
+  saveJobToCloud(newJob);
   document.getElementById('sched-notes').value = '';
   document.getElementById('sched-time').value = '';
   toast('✓ Job scheduled for ' + techName);
@@ -1462,12 +1469,14 @@ function renderSchedList(filter) {
       doneBtn.addEventListener('click', function(){
         var s2 = loadSchedule();
         var jj = s2.find(function(x){ return x.id===j.id; });
-        if (jj) { jj.done = !jj.done; saveSchedule(s2); filterSched(schedFilter); }
+        if (jj) { jj.done = !jj.done; saveSchedule(s2); updateJobInCloud(jj.id, {done: jj.done}); filterSched(schedFilter); }
       });
       delBtn.addEventListener('click', function(){
         if (!confirm('Delete this job?')) return;
         var s2 = loadSchedule().filter(function(x){ return x.id !== j.id; });
-        saveSchedule(s2); filterSched(schedFilter);
+        saveSchedule(s2);
+        deleteJobFromCloud(j.id);
+        filterSched(schedFilter);
       });
     })(job);
 
@@ -1528,15 +1537,7 @@ newReport = function() {
   goHome();
 };
 
-// ============================================================
-// INIT OVERRIDE - start on home screen
-// ============================================================
-// Run after existing init
-setTimeout(function() {
-  populateTechSelects();
-  populateSchedDropdowns();
-  goHome();
-}, 10);
+// (cloud sync init moved to end of script)
 
 // ============================================================
 // TECHNICIAN MANAGEMENT
@@ -1611,8 +1612,9 @@ function renderTechList() {
     del.textContent = '✕ Remove';
     (function(idx){ del.addEventListener('click', function(){
       var techs2 = loadTechs();
-      techs2.splice(idx, 1);
+      var removedTech = techs2.splice(idx, 1)[0];
       saveTechs(techs2);
+      if (removedTech && removedTech.id) deleteTechFromCloud(removedTech.id);
       renderTechList();
     }); })(i);
     row.appendChild(info); row.appendChild(del);
@@ -1629,8 +1631,10 @@ function addTech() {
   if (techs.some(function(t){ return t.name.toLowerCase() === name.toLowerCase(); })) {
     toast('⚠️ Technician already exists'); return;
   }
-  techs.push({ name: name, lic: lic });
+  var newTech = { name: name, lic: lic };
+  techs.push(newTech);
   saveTechs(techs);
+  saveTechToCloud(newTech);
   document.getElementById('nt-name').value = '';
   document.getElementById('nt-lic').value  = '';
   renderTechList();
@@ -1708,8 +1712,10 @@ function saveApiKeyUI() {
   var inp = document.getElementById('api-key-input');
   var st = document.getElementById('api-key-status');
   if (!inp || !inp.value.trim()) { if (st) { st.textContent = 'Enter a key first'; st.style.color = 'var(--mu)'; } return; }
-  localStorage.setItem('es_api_key', inp.value.trim());
-  if (st) { st.textContent = 'Saved'; st.style.color = 'var(--g)'; }
+  var apiKeyVal = inp.value.trim();
+  localStorage.setItem('es_api_key', apiKeyVal);
+  saveApiKeyToCloud(apiKeyVal);
+  if (st) { st.textContent = 'Saved & synced'; st.style.color = 'var(--g)'; }
 }
 
 // Populate API key field when admin opens
@@ -2210,6 +2216,344 @@ async function analyseAllPhotos(apiKey) {
   return Promise.all(promises);
 }
 
+
+// ============================================================
+// SUPABASE CLOUD SYNC
+// ============================================================
+var SB_URL = 'https://xfnrchffempbnitcfvgu.supabase.co';
+var SB_KEY = 'sb_publishable_mPv7fdGXwbrG6h-GcZP9vg_y15yqJ5T';
+
+function sbHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Prefer': 'return=representation'
+  };
+}
+
+async function sbGet(table, params) {
+  var url = SB_URL + '/rest/v1/' + table + '?order=created_at.asc';
+  if (params) url += '&' + params;
+  var resp = await fetch(url, { headers: sbHeaders() });
+  if (!resp.ok) throw new Error('sbGet ' + table + ' HTTP ' + resp.status);
+  return resp.json();
+}
+
+async function sbUpsert(table, data, onConflict) {
+  var url = SB_URL + '/rest/v1/' + table;
+  if (onConflict) url += '?on_conflict=' + onConflict;
+  var resp = await fetch(url, {
+    method: 'POST',
+    headers: Object.assign({}, sbHeaders(), { 'Prefer': 'resolution=merge-duplicates,return=representation' }),
+    body: JSON.stringify(data)
+  });
+  if (!resp.ok) {
+    var err = await resp.text();
+    throw new Error('sbUpsert ' + table + ' HTTP ' + resp.status + ': ' + err);
+  }
+  return resp.json();
+}
+
+async function sbInsert(table, data) {
+  var url = SB_URL + '/rest/v1/' + table;
+  var resp = await fetch(url, {
+    method: 'POST',
+    headers: sbHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!resp.ok) throw new Error('sbInsert ' + table + ' HTTP ' + resp.status);
+  return resp.json();
+}
+
+async function sbUpdate(table, id, data, idCol) {
+  idCol = idCol || 'id';
+  var url = SB_URL + '/rest/v1/' + table + '?' + idCol + '=eq.' + id;
+  var resp = await fetch(url, {
+    method: 'PATCH',
+    headers: sbHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!resp.ok) throw new Error('sbUpdate ' + table + ' HTTP ' + resp.status);
+  return resp.json();
+}
+
+async function sbDelete(table, id, idCol) {
+  idCol = idCol || 'id';
+  var url = SB_URL + '/rest/v1/' + table + '?' + idCol + '=eq.' + id;
+  var resp = await fetch(url, { method: 'DELETE', headers: sbHeaders() });
+  if (!resp.ok) throw new Error('sbDelete ' + table + ' HTTP ' + resp.status);
+}
+
+// ============================================================
+// SYNC STATUS UI
+// ============================================================
+function showSyncStatus(msg, isError) {
+  var el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? '#c0392b' : '#27ae60';
+  el.style.display = 'block';
+  if (!isError) setTimeout(function() { el.style.display = 'none'; }, 2500);
+}
+
+// ============================================================
+// SITES - CLOUD VERSIONS
+// ============================================================
+async function loadSitesFromCloud() {
+  try {
+    var rows = await sbGet('sites');
+    S.sites = rows.map(function(r) {
+      return {
+        id: r.id,
+        name: r.name,
+        addr: r.addr || '',
+        contact: r.contact || '',
+        phone: r.phone || '',
+        email: r.email || '',
+        freq: r.freq || 'Monthly',
+        defTech: r.def_tech || '',
+        stations: r.stations || {}
+      };
+    });
+    // Also cache locally as fallback
+    localStorage.setItem('es_sites', JSON.stringify(S.sites));
+    return true;
+  } catch(e) {
+    console.warn('loadSitesFromCloud failed, using local:', e);
+    // Fall back to localStorage
+    try {
+      var saved = localStorage.getItem('es_sites');
+      if (saved) S.sites = JSON.parse(saved);
+    } catch(e2) {}
+    return false;
+  }
+}
+
+async function saveSiteToCloud(site) {
+  try {
+    var payload = {
+      name: site.name,
+      addr: site.addr || '',
+      contact: site.contact || '',
+      phone: site.phone || '',
+      email: site.email || '',
+      freq: site.freq || 'Monthly',
+      def_tech: site.defTech || '',
+      stations: site.stations || {},
+      updated_at: new Date().toISOString()
+    };
+    if (site.id) {
+      payload.id = site.id;
+      await sbUpsert('sites', payload, 'id');
+    } else {
+      var result = await sbInsert('sites', payload);
+      if (result && result[0]) site.id = result[0].id;
+    }
+    localStorage.setItem('es_sites', JSON.stringify(S.sites));
+    showSyncStatus('✓ Synced');
+    return true;
+  } catch(e) {
+    console.warn('saveSiteToCloud failed:', e);
+    localStorage.setItem('es_sites', JSON.stringify(S.sites));
+    showSyncStatus('⚠ Saved locally only', true);
+    return false;
+  }
+}
+
+async function deleteSiteFromCloud(site) {
+  try {
+    if (site.id) await sbDelete('sites', site.id);
+    localStorage.setItem('es_sites', JSON.stringify(S.sites));
+    showSyncStatus('✓ Deleted');
+  } catch(e) {
+    console.warn('deleteSiteFromCloud failed:', e);
+    localStorage.setItem('es_sites', JSON.stringify(S.sites));
+  }
+}
+
+// ============================================================
+// TECHNICIANS - CLOUD VERSIONS
+// ============================================================
+async function loadTechsFromCloud() {
+  try {
+    var rows = await sbGet('technicians');
+    var techs = rows.map(function(r) {
+      return { id: r.id, name: r.name, lic: r.lic || '' };
+    });
+    localStorage.setItem('es_techs', JSON.stringify(techs));
+    return techs;
+  } catch(e) {
+    console.warn('loadTechsFromCloud failed, using local:', e);
+    try {
+      var saved = localStorage.getItem('es_techs');
+      return saved ? JSON.parse(saved) : [];
+    } catch(e2) { return []; }
+  }
+}
+
+async function saveTechToCloud(tech) {
+  try {
+    var payload = { name: tech.name, lic: tech.lic || '' };
+    var result = await sbInsert('technicians', payload);
+    if (result && result[0]) tech.id = result[0].id;
+    var techs = loadTechs();
+    localStorage.setItem('es_techs', JSON.stringify(techs));
+    showSyncStatus('✓ Synced');
+    return tech;
+  } catch(e) {
+    console.warn('saveTechToCloud failed:', e);
+    showSyncStatus('⚠ Saved locally only', true);
+    return tech;
+  }
+}
+
+async function deleteTechFromCloud(techId) {
+  try {
+    if (techId) await sbDelete('technicians', techId);
+    showSyncStatus('✓ Deleted');
+  } catch(e) {
+    console.warn('deleteTechFromCloud failed:', e);
+  }
+}
+
+// ============================================================
+// SCHEDULED JOBS - CLOUD VERSIONS
+// ============================================================
+async function loadScheduleFromCloud() {
+  try {
+    var rows = await sbGet('scheduled_jobs');
+    var jobs = rows.map(function(r) {
+      return {
+        id: r.id,
+        techName: r.tech_name,
+        siteName: r.site_name,
+        siteAddr: r.site_addr || '',
+        date: r.date,
+        time: r.time || '',
+        notes: r.notes || '',
+        done: r.done || false,
+        active: r.active !== false
+      };
+    });
+    localStorage.setItem('es_sched', JSON.stringify(jobs));
+    return jobs;
+  } catch(e) {
+    console.warn('loadScheduleFromCloud failed, using local:', e);
+    try {
+      var saved = localStorage.getItem('es_sched');
+      return saved ? JSON.parse(saved) : [];
+    } catch(e2) { return []; }
+  }
+}
+
+async function saveJobToCloud(job) {
+  try {
+    var payload = {
+      tech_name: job.techName,
+      site_name: job.siteName,
+      site_addr: job.siteAddr || '',
+      date: job.date,
+      time: job.time || null,
+      notes: job.notes || null,
+      done: job.done || false,
+      active: job.active !== false
+    };
+    var result = await sbInsert('scheduled_jobs', payload);
+    if (result && result[0]) job.id = result[0].id;
+    showSyncStatus('✓ Synced');
+    return job;
+  } catch(e) {
+    console.warn('saveJobToCloud failed:', e);
+    showSyncStatus('⚠ Saved locally only', true);
+    return job;
+  }
+}
+
+async function updateJobInCloud(jobId, updates) {
+  try {
+    var payload = {};
+    if (updates.done !== undefined) payload.done = updates.done;
+    if (updates.active !== undefined) payload.active = updates.active;
+    await sbUpdate('scheduled_jobs', jobId, payload);
+  } catch(e) {
+    console.warn('updateJobInCloud failed:', e);
+  }
+}
+
+async function deleteJobFromCloud(jobId) {
+  try {
+    await sbDelete('scheduled_jobs', jobId);
+  } catch(e) {
+    console.warn('deleteJobFromCloud failed:', e);
+  }
+}
+
+// ============================================================
+// API KEY - CLOUD VERSIONS
+// ============================================================
+async function saveApiKeyToCloud(key) {
+  try {
+    await sbUpsert('app_config', { key: 'anthropic_api_key', value: key, updated_at: new Date().toISOString() }, 'key');
+  } catch(e) {
+    console.warn('saveApiKeyToCloud failed:', e);
+  }
+}
+
+async function loadApiKeyFromCloud() {
+  try {
+    var rows = await sbGet('app_config', 'key=eq.anthropic_api_key');
+    if (rows && rows[0] && rows[0].value) {
+      localStorage.setItem('es_api_key', rows[0].value);
+      return rows[0].value;
+    }
+    return localStorage.getItem('es_api_key') || '';
+  } catch(e) {
+    return localStorage.getItem('es_api_key') || '';
+  }
+}
+
+// ============================================================
+// INITIAL CLOUD SYNC ON APP LOAD
+// ============================================================
+async function initialCloudSync() {
+  showSyncStatus('Syncing...', false);
+  try {
+    // Load all data from cloud in parallel
+    await Promise.all([
+      loadSitesFromCloud(),
+      loadApiKeyFromCloud()
+    ]);
+    // Techs and schedule need results stored
+    var techs = await loadTechsFromCloud();
+    localStorage.setItem('es_techs', JSON.stringify(techs));
+    var jobs = await loadScheduleFromCloud();
+    localStorage.setItem('es_sched', JSON.stringify(jobs));
+
+    showSyncStatus('✓ Synced');
+    return true;
+  } catch(e) {
+    console.warn('initialCloudSync failed:', e);
+    showSyncStatus('⚠ Offline mode', true);
+    return false;
+  }
+}
+
+
+// ============================================================
+// STARTUP - run cloud sync after all functions are defined
+// ============================================================
+initialCloudSync().then(function() {
+  populateTechSelects();
+  populateSchedDropdowns();
+  renderSiteList();
+  if (activeTechIdx !== null) showTechJobs(activeTechIdx);
+  goHome();
+}).catch(function() {
+  populateTechSelects();
+  populateSchedDropdowns();
+  goHome();
+});
 </script>
 </body>
 </html>
